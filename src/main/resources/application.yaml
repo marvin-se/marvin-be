@@ -1,0 +1,7 @@
+spring:
+  profiles:
+    active: dev   # local development için default profil
+
+
+# bunu sonra prodda envirment var ile override edeceğiz.
+# SPRING_PROFILES_ACTIVE=prod

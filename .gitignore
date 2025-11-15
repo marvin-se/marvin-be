@@ -66,6 +66,7 @@ Desktop.ini
 ###############################
 # DO NOT COMMIT sensitive configs
 application.properties
-application.yml
+application-prod.yaml
+
 *.env
 .env.*

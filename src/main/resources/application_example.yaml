@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: campustrade-be
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/campustrade_db
+    username: your_db_username
+    password: your_db_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none  # recommended when using Liquibase
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  liquibase:
+    change-log: classpath:db.changelog/master.yaml
+    enabled: true
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.marvin.campustrade: DEBUG
+
+# Example JWT configuration (add when security implemented)
+jwt:
+  secret: your_secret_key_here
+  expiration: 86400000 # 24 hours in ms
+
+# CORS configuration for mobile + web
+cors:
+  allowed-origins:
+    - http://localhost:3000         # frontend local
+    - http://localhost:5173         # vite/react
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
