@@ -2,12 +2,12 @@ spring:
   datasource:
     url: jdbc:h2:mem:campustrade_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
-    username: sa
+    username: test
     password:
 
   jpa:
     hibernate:
-      ddl-auto: update   # Geliştirme için uygun
+      ddl-auto: none   # managed by liquibase
     show-sql: true
     properties:
       hibernate:
@@ -19,12 +19,25 @@ spring:
       path: /h2-console
 
   liquibase:
-    enabled: false   # H2 ile genelde dev aşamasında kapatılır
+    enabled: true
+    change-log: classpath:db.changelog/master.yaml
 
 server:
   port: 8080
 
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
   level:
     root: INFO
     com.marvin.campustrade: DEBUG
+
+    # SQL queries
+    org.hibernate.SQL: DEBUG
+
+    # SQL bind parameters
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+    # transaction events
+    org.springframework.orm.jpa.JpaTransactionManager: DEBUG
