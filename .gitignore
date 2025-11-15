@@ -1,0 +1,71 @@
+###############################
+# Spring Boot / Maven
+###############################
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+!/.mvn/wrapper/maven-wrapper.properties
+
+###############################
+# JAR / WAR / Logs
+###############################
+*.jar
+*.war
+*.log
+
+###############################
+# IntelliJ IDEA
+###############################
+.idea/
+*.iml
+*.iws
+*.ipr
+
+###############################
+# Eclipse / STS
+###############################
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans/
+.sts4-cache/
+
+###############################
+# VS Code
+###############################
+.vscode/
+
+###############################
+# NetBeans
+###############################
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+###############################
+# OS Files
+###############################
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+###############################
+# Security (Highly Recommended)
+###############################
+# DO NOT COMMIT sensitive configs
+application.properties
+application.yml
+*.env
+.env.*
