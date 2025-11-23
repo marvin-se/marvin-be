@@ -20,6 +20,7 @@ public class productEntity {
     @Column(name = "description")
     private String description;
 
+
     @Column(name = "price")
     private int price;
 

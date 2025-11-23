@@ -16,6 +16,7 @@ public class favouriteEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     @Column(name = "product_id", nullable = false)
     private Long product_id;
 

@@ -18,6 +18,7 @@ public class messageEntity {
     @Column(name = "sender_id", nullable = false)
     private Long sender_id;
 
+
     @Column(name = "receiver_id", nullable = false)
     private Long receiver_id;
 

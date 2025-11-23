@@ -18,6 +18,7 @@ public class imageEntity {
     @Column(name = "product_id", nullable = false)
     private Long product_id;
 
+
     @Column(name = "image_url", nullable = false)
     private String image_url;
 

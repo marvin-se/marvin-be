@@ -20,6 +20,7 @@ public class userEntity {
     @Column(name = "full_name")
     private String full_name;
 
+
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
