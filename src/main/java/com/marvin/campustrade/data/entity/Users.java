@@ -11,7 +11,7 @@ import org.hibernate.annotations.Where;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "USER",
+@Table(name = "USERS",
         indexes = {
         @Index(columnList = "UNIVERSITY_ID")
 })
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @SQLDelete(sql = "UPDATE USER SET IS_ACTIVE = false WHERE ID = ?")
 @Where(clause = "IS_ACTIVE = true")
-public class User {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)

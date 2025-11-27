@@ -50,7 +50,7 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "USER_ID", nullable = false)
-    private User user;
+    private Users user;
 
     @PrePersist
     protected void onCreate() {

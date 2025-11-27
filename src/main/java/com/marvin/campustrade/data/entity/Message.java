@@ -33,11 +33,11 @@ public class Message {
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "SENDER_ID")
-    private User sender;
+    private Users sender;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "RECEIVER_ID")
-    private User receiver;
+    private Users receiver;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "PRODUCT_ID")

@@ -5,7 +5,7 @@ INSERT INTO UNIVERSITY (name, domain, city) VALUES
 ('Bogazici University', 'boun.edu.tr', 'Istanbul'),
 ('Hacettepe University', 'hacettepe.edu.tr', 'Ankara');
 
-INSERT INTO USER (full_name, profile_pic_url, email, password_hash, university, phone_number, created_at, is_active)
+INSERT INTO USERS (full_name, profile_pic_url, email, password_hash, university, phone_number, created_at, is_active)
 VALUES
 ('Ayşe Yılmaz', 'https://pics.com/p1.jpg', 'ayse@itu.edu.tr', 'hash123', 1, '5551112233', NOW(), TRUE),
 ('Mehmet Demir', 'https://pics.com/p2.jpg', 'mehmet@metu.edu.tr', 'hash456', 2, '5554445566', NOW(), TRUE),
