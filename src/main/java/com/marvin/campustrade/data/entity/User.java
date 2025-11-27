@@ -41,7 +41,7 @@ public class User {
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;
 
-    @Column(name = "IS_ACTIVE")
+    @Column(name = "IS_ACTIVE", columnDefinition = "BOOLEAN DEFAULT TRUE")
     private Boolean isActive = true;
 
     @ManyToOne(fetch = FetchType.LAZY)

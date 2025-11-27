@@ -20,7 +20,7 @@ CREATE TABLE USER (
     university_id BIGINT NOT NULL,
     phone_number VARCHAR(50),
     created_at TIMESTAMP,
-    is_active BOOLEAN,
+    is_active BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (university_id) REFERENCES university(id)
 );
 CREATE INDEX idx_user_university_id ON `USER` (`university_id`);
@@ -58,16 +58,19 @@ CREATE INDEX idx_image_product_id ON `IMAGE` (`product_id`);
 -- =====================
 CREATE TABLE MESSAGE (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    sender_id BIGINT NOT NULL,
-    receiver_id BIGINT NOT NULL,
-    product_id BIGINT NOT NULL,
+    sender_id BIGINT,
+    receiver_id BIGINT,
+    product_id BIGINT,
     content TEXT,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (sender_id) REFERENCES user(id),
-    FOREIGN KEY (receiver_id) REFERENCES user(id),
-    FOREIGN KEY (product_id) REFERENCES product(id)
+    sent_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (sender_id) REFERENCES user(id) ON DELETE SET NULL,
+    FOREIGN KEY (receiver_id) REFERENCES user(id) ON DELETE SET NULL,
+    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE SET NULL
 );
-
+CREATE INDEX idx_message_product_id ON `MESSAGE` (`product_id`);
+CREATE INDEX idx_message_sender_id ON `MESSAGE` (`sender_id`);
+CREATE INDEX idx_message_receiver_id ON `MESSAGE` (`receiver_id`);
 -- =====================
 -- FAVOURITES
 -- =====================
