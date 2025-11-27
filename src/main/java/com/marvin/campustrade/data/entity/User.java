@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.Where;
 
 
 import java.time.LocalDateTime;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @SQLDelete(sql = "UPDATE USER SET IS_ACTIVE = false WHERE ID = ?")
-@SQLRestriction("IS_ACTIVE = true")
+@Where(clause = "IS_ACTIVE = true")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +42,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @Column(name = "IS_ACTIVE")
-    private Boolean isActive;
+    private Boolean isActive = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UNIVERSITY_ID", nullable = false)

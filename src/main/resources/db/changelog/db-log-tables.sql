@@ -35,10 +35,13 @@ CREATE TABLE PRODUCT (
     category VARCHAR(100) NOT NULL,
     status VARCHAR(50),
     created_at TIMESTAMP,
-    user_id BIGINT,
+    user_id BIGINT NOT NULL,
     updated_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
+CREATE INDEX idx_product_user_id ON `PRODUCT` (`user_id`);
+CREATE INDEX idx_product_category ON `PRODUCT` (`category`);
+CREATE INDEX idx_product_status ON `PRODUCT` (`status`);
 
 -- =====================
 -- IMAGES
