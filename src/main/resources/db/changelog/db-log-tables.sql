@@ -1,7 +1,7 @@
 -- =====================
 -- UNIVERSITIES
 -- =====================
-CREATE TABLE universities (
+CREATE TABLE UNIVERSITY (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
     domain VARCHAR(200) NOT NULL,
@@ -11,67 +11,67 @@ CREATE TABLE universities (
 -- =====================
 -- USERS
 -- =====================
-CREATE TABLE users (
+CREATE TABLE USER (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(200),
     profile_pic_url VARCHAR(300),
     email VARCHAR(200) NOT NULL UNIQUE,
     password_hash VARCHAR(300) NOT NULL,
-    university BIGINT NOT NULL,
+    university_id BIGINT NOT NULL,
     phone_number VARCHAR(50),
     created_at TIMESTAMP,
     is_active BOOLEAN,
-    FOREIGN KEY (university) REFERENCES universities(id)
+    FOREIGN KEY (university) REFERENCES university(id)
 );
 
 -- =====================
 -- PRODUCTS
 -- =====================
-CREATE TABLE products (
+CREATE TABLE PRODUCT (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description VARCHAR(500),
-    price INT,
+    price DECIMAL(10,2),
     category VARCHAR(100) NOT NULL,
     status VARCHAR(50),
     created_at TIMESTAMP,
-    created_by BIGINT,
+    user_id BIGINT,
     updated_at TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 -- =====================
 -- IMAGES
 -- =====================
-CREATE TABLE images (
+CREATE TABLE IMAGE (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id BIGINT NOT NULL,
     image_url VARCHAR(500) NOT NULL,
-    FOREIGN KEY (product_id) REFERENCES products(id)
+    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
 );
 
 -- =====================
 -- MESSAGES
 -- =====================
-CREATE TABLE messages (
+CREATE TABLE MESSAGE (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     sender_id BIGINT NOT NULL,
     receiver_id BIGINT NOT NULL,
     product_id BIGINT NOT NULL,
     content TEXT,
-    is_read BOOLEAN,
-    FOREIGN KEY (sender_id) REFERENCES users(id),
-    FOREIGN KEY (receiver_id) REFERENCES users(id),
-    FOREIGN KEY (product_id) REFERENCES products(id)
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (sender_id) REFERENCES user(id),
+    FOREIGN KEY (receiver_id) REFERENCES user(id),
+    FOREIGN KEY (product_id) REFERENCES product(id)
 );
 
 -- =====================
 -- FAVOURITES
 -- =====================
-CREATE TABLE favourites (
+CREATE TABLE FAVOURITE (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    FOREIGN KEY (product_id) REFERENCES products(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (product_id) REFERENCES product(id),
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
