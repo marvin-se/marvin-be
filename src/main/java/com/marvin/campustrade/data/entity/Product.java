@@ -39,7 +39,7 @@ public class Product {
     private Category category;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "STATUS", nullable = false)
     private Status status;
 
     @Column(name = "CREATED_AT")

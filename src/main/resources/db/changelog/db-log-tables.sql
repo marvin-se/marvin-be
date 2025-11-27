@@ -52,7 +52,7 @@ CREATE TABLE IMAGE (
     image_url VARCHAR(500) NOT NULL,
     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
 );
-
+CREATE INDEX idx_image_product_id ON `IMAGE` (`product_id`);
 -- =====================
 -- MESSAGES
 -- =====================
