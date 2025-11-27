@@ -75,6 +75,8 @@ CREATE TABLE FAVOURITE (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    FOREIGN KEY (product_id) REFERENCES product(id),
+    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
+CREATE INDEX idx_favourite_product_id ON `FAVOURITE` (`product_id`);
+CREATE INDEX idx_favourite_user_id ON `FAVOURITE` (`user_id`);
