@@ -21,9 +21,9 @@ CREATE TABLE USER (
     phone_number VARCHAR(50),
     created_at TIMESTAMP,
     is_active BOOLEAN,
-    FOREIGN KEY (university) REFERENCES university(id)
+    FOREIGN KEY (university_id) REFERENCES university(id)
 );
-
+CREATE INDEX idx_user_university_id ON `USER` (`university_id`);
 -- =====================
 -- PRODUCTS
 -- =====================
