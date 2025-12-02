@@ -1,5 +1,6 @@
 package com.marvin.campustrade.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,10 @@ public class Users {
 
     @Column(name = "EMAIL", nullable = false)
     private String email;
+
+    @JsonIgnore
+    @Column(name = "PASSWORD_HASH", nullable = false)
+    private String passwordHash;
 
     @Column(name = "PHONE_NUMBER")
     private String phoneNumber;
