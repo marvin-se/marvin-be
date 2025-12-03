@@ -12,6 +12,8 @@ import com.marvin.campustrade.repository.UniversityRepository;
 import com.marvin.campustrade.repository.UserRepository;
 import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +52,15 @@ public class UserServiceImpl implements UserService {
         Users saved = userRepository.save(user);
 
         return userMapper.toResponse(saved);
+    }
+
+    public Users getCurrentUser(){
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
 }
