@@ -1,6 +1,7 @@
 package com.marvin.campustrade.service.impl;
 
 import com.marvin.campustrade.data.dto.auth.RegisterRequest;
+import com.marvin.campustrade.data.dto.auth.UserResponse;
 import com.marvin.campustrade.data.entity.University;
 import com.marvin.campustrade.data.entity.Users;
 import com.marvin.campustrade.data.mapper.UserMapper;
@@ -23,7 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public Users createUser(RegisterRequest request){
+    public UserResponse createUser(RegisterRequest request){
         // Check if the email is already in use
         if(userRepository.findByEmail(request.getEmail()).isPresent()){
             throw new EmailAlreadyExistsException("Email is already registered");
@@ -46,8 +47,9 @@ public class UserServiceImpl implements UserService {
         Users user = userMapper.toEntity(request);
         user.setUniversity(university);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        Users saved = userRepository.save(user);
 
-        return userRepository.save(user);
+        return userMapper.toResponse(saved);
     }
 
 }

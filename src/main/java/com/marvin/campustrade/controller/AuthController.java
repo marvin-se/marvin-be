@@ -19,16 +19,7 @@ public class AuthController {
     private final UserService userService;
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
-        Users saved = userService.createUser(request);
-        UserResponse response = new UserResponse(
-                saved.getId(),
-                saved.getFullName(),
-                saved.getEmail(),
-                saved.getPhoneNumber(),
-                saved.getUniversity(),
-                saved.getProfilePicUrl()
-        );
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(userService.createUser(request));
     }
 
 }
