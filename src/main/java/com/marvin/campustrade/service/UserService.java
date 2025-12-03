@@ -6,4 +6,5 @@ import com.marvin.campustrade.data.entity.Users;
 
 public interface UserService {
     UserResponse createUser(RegisterRequest request);
+    Users  getCurrentUser();
 }
