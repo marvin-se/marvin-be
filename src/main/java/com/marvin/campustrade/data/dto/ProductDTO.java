@@ -33,7 +33,6 @@ public class ProductDTO {
         private List<String> images;
     }
 
-    // ---------- RESPONSE (record like your friend's UserResponse) ----------
     @Getter
     @Setter
     @NoArgsConstructor
