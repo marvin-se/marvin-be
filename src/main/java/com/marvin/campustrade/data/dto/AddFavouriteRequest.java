@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AddFavouriteRequest {
+
     private Long userId;
     private Long productId;
 }

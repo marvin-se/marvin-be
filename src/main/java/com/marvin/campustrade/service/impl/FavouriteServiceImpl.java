@@ -28,7 +28,7 @@ public class FavouriteServiceImpl implements FavouriteService{
     @Override
     public FavouriteDTO addToFavourites(Long userId, Long productId){
 
-        if(favouriteRepository.existByUserIdAndProductId(userId,productId)){
+        if(favouriteRepository.existsByUserIdAndProductId(userId,productId)){
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Product is favourite already"
@@ -39,10 +39,7 @@ public class FavouriteServiceImpl implements FavouriteService{
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"user not found"));
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Product with ID " + productId + " not found"
-                ));
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
         Favourite favourite = new Favourite();
         favourite.setUser(user);

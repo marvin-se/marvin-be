@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/favourites")
+@RequestMapping("/favourites")
 @RequiredArgsConstructor
 public class FavouriteController {
     private final FavouriteService favouriteService;

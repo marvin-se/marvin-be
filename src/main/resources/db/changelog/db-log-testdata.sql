@@ -14,11 +14,11 @@ VALUES
 ('Zeynep Er', NULL, 'zeynep@hacettepe.edu.tr', 'hash202', 5, '5553030303', NOW(), FALSE);
 
 INSERT INTO PRODUCT (title, description, price, category, status, created_at, user_id, updated_at) VALUES
-('Casio Scientific Calculator', 'Used but works perfectly.', 200, 'Electronics', 'available', NOW(), 1, NOW()),
-('Desk Lamp', 'LED desk lamp with adjustable arm.', 150, 'Home', 'available', NOW(), 2, NOW()),
-('Computer Chair', 'Ergonomic chair (blue color)', 700, 'Furniture', 'sold', NOW(), 1, NOW()),
-('Mechanical Keyboard', 'Red switches, RGB lights.', 850, 'Electronics', 'available', NOW(), 3, NOW()),
-('Graphing Notebook Set', '5 notebooks, A4 size.', 60, 'Stationery', 'available', NOW(), 4, NOW());
+('Casio Scientific Calculator', 'Used but works perfectly.', 200, 'ELECTRONICS', 'AVAILABLE', NOW(), 1, NOW()),
+('Desk Lamp', 'LED desk lamp with adjustable arm.', 150, 'HOME', 'AVAILABLE', NOW(), 2, NOW()),
+('Computer Chair', 'Ergonomic chair (blue color)', 700, 'Furniture', 'SOLD', NOW(), 1, NOW()),
+('Mechanical Keyboard', 'Red switches, RGB lights.', 850, 'ELECTRONICS', 'AVAILABLE', NOW(), 3, NOW()),
+('Graphing Notebook Set', '5 notebooks, A4 size.', 60, 'Stationery', 'AVAILABLE', NOW(), 4, NOW());
 
 INSERT INTO IMAGE (product_id, image_url) VALUES
 (1, 'https://pics.com/calculator1.jpg'),

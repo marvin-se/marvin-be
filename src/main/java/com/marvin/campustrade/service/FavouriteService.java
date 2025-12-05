@@ -5,7 +5,8 @@ import java.util.List;
 
 public  interface FavouriteService {
 
-        FavouriteDTO addToFavourites(Long userId, Long productId);
+
+    FavouriteDTO addToFavourites(Long userId, Long productId);
 
         void removeFromFavourites(Long userId, Long productId);
 
