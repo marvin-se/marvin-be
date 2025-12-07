@@ -27,6 +27,13 @@ INSERT INTO IMAGE (product_id, image_url) VALUES
 (3, 'https://pics.com/chair1.jpg'),
 (4, 'https://pics.com/keyboard1.jpg');
 
+
+INSERT INTO CONVERSATION (id, user_one_id, user_two_id, product_id, created_at) VALUES
+(1, 2, 1, 1, '2025-11-01 09:50:00'),
+(2, 3, 1, 3, '2025-11-02 12:25:00'),
+(3, 4, 3, 4, '2025-11-03 09:10:00'),
+(4, 5, 1, 5, '2025-11-04 14:00:00');
+
 -- MESSAGE örnek verileri (artık product_id değil conversation_id kullanılıyor)
 INSERT INTO MESSAGE (sender_id, receiver_id, conversation_id, content, is_read, sent_at) VALUES
 (2, 1, 1, 'Is the calculator still available?', FALSE, '2025-11-01 10:00:00'),
@@ -56,9 +63,3 @@ INSERT INTO TOKEN (user_id, content, type, created_at, expires_at) VALUES
 INSERT INTO USERS_BLOCK (blocker_id, blocked_id, created_at) VALUES
 (1, 3, '2025-11-02 13:00:00'),
 (2, 5, '2025-11-03 08:00:00');
-
-INSERT INTO CONVERSATION (id, user_one_id, user_two_id, product_id, created_at) VALUES
-(1, 2, 1, 1, '2025-11-01 09:50:00'),
-(2, 3, 1, 3, '2025-11-02 12:25:00'),
-(3, 4, 3, 4, '2025-11-03 09:10:00'),
-(4, 5, 1, 5, '2025-11-04 14:00:00');

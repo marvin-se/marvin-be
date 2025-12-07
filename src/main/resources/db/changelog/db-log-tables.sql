@@ -53,27 +53,7 @@ CREATE TABLE IMAGE (
     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
 );
 CREATE INDEX idx_image_product_id ON `IMAGE` (`product_id`);
--- =====================
--- MESSAGES
--- =====================
-CREATE TABLE MESSAGE (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    sender_id BIGINT,
-    receiver_id BIGINT,
-    conversation_id BIGINT,
-    --product_id BIGINT,
-    content TEXT,
-    is_read BOOLEAN NOT NULL DEFAULT FALSE,
-    sent_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (conversation_id) REFERENCES conversation(id) ON DELETE CASCADE
-    --FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE SET NULL
-);
--- INDEX idx_message_product_id ON `MESSAGE` (`product_id`);
-CREATE INDEX idx_message_conversation_id ON `MESSAGE` (`conversation_id`);
-CREATE INDEX idx_message_sender_id ON `MESSAGE` (`sender_id`);
-CREATE INDEX idx_message_receiver_id ON `MESSAGE` (`receiver_id`);
+
 -- =====================
 -- FAVOURITES
 -- =====================
@@ -103,6 +83,27 @@ CREATE TABLE CONVERSATION (
 CREATE INDEX idx_conversation_user_one_id ON `CONVERSATION` (`user_one_id`);
 CREATE INDEX idx_conversation_user_two_id ON `CONVERSATION` (`user_two_id`);
 CREATE INDEX idx_conversation_product_id ON `CONVERSATION` (`product_id`);
+-- =====================
+-- MESSAGES
+-- =====================
+CREATE TABLE MESSAGE (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sender_id BIGINT,
+    receiver_id BIGINT,
+    conversation_id BIGINT,
+    --product_id BIGINT,
+    content TEXT,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    sent_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (conversation_id) REFERENCES conversation(id) ON DELETE CASCADE
+    --FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE SET NULL
+);
+-- INDEX idx_message_product_id ON `MESSAGE` (`product_id`);
+CREATE INDEX idx_message_conversation_id ON `MESSAGE` (`conversation_id`);
+CREATE INDEX idx_message_sender_id ON `MESSAGE` (`sender_id`);
+CREATE INDEX idx_message_receiver_id ON `MESSAGE` (`receiver_id`);
 -- =====================
 -- USERS_BLOCK
 -- =====================
@@ -144,7 +145,7 @@ CREATE TABLE TOKEN (
     type VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     expires_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_token_user_id ON `TOKEN` (`user_id`);
