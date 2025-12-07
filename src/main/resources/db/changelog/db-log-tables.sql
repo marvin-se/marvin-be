@@ -134,3 +134,17 @@ CREATE UNIQUE INDEX idx_transaction_product_id ON `TRANSACTION` (`product_id`);
 CREATE INDEX idx_transaction_buyer_id ON `TRANSACTION` (`buyer_id`);
 CREATE INDEX idx_transaction_seller_id ON `TRANSACTION` (`seller_id`);
 
+-- =====================
+-- TOKENS
+-- =====================
+CREATE TABLE TOKEN (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    content VARCHAR(500) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+);
+
+CREATE INDEX idx_token_user_id ON `TOKEN` (`user_id`);
