@@ -14,11 +14,11 @@ VALUES
 ('Zeynep Er', NULL, 'zeynep@hacettepe.edu.tr', 'hash202', 5, '5553030303', NOW(), FALSE);
 
 INSERT INTO PRODUCT (title, description, price, category, status, created_at, user_id, updated_at) VALUES
-('Casio Scientific Calculator', 'Used but works perfectly.', 200, 'Electronics', 'available', NOW(), 1, NOW()),
-('Desk Lamp', 'LED desk lamp with adjustable arm.', 150, 'Home', 'available', NOW(), 2, NOW()),
-('Computer Chair', 'Ergonomic chair (blue color)', 700, 'Furniture', 'sold', NOW(), 1, NOW()),
-('Mechanical Keyboard', 'Red switches, RGB lights.', 850, 'Electronics', 'available', NOW(), 3, NOW()),
-('Graphing Notebook Set', '5 notebooks, A4 size.', 60, 'Stationery', 'available', NOW(), 4, NOW());
+('Casio Scientific Calculator', 'Used but works perfectly.', 200, 'ELECTRONICS', 'AVAILABLE', NOW(), 1, NOW()),
+('Desk Lamp', 'LED desk lamp with adjustable arm.', 150, 'HOME', 'AVAILABLE', NOW(), 2, NOW()),
+('Computer Chair', 'Ergonomic chair (blue color)', 700, 'HOME', 'SOLD', NOW(), 1, NOW()),
+('Mechanical Keyboard', 'Red switches, RGB lights.', 850, 'ELECTRONICS', 'AVAILABLE', NOW(), 3, NOW()),
+('Graphing Notebook Set', '5 notebooks, A4 size.', 60, 'OTHER', 'AVAILABLE', NOW(), 4, NOW());
 
 INSERT INTO IMAGE (product_id, image_url) VALUES
 (1, 'https://pics.com/calculator1.jpg'),
@@ -54,10 +54,10 @@ INSERT INTO TRANSACTION (product_id, buyer_id, seller_id, created_at) VALUES
 
 -- TOKEN örnek verileri (bazıları süresi geçmiş, bazıları geçerli)
 INSERT INTO TOKEN (user_id, content, type, created_at, expires_at) VALUES
-(1, 'verif-token-1-abc', 'VERIFICATION', '2025-11-01 08:00:00', '2025-11-10 00:00:00'),
-(2, 'verif-token-2-def', 'VERIFICATION', '2025-11-02 09:00:00', '2025-10-01 00:00:00'), -- expired
-(3, 'session-token-3-ghi', 'SESSION', '2025-11-03 10:00:00', '2026-01-01 00:00:00'),
-(4, 'verif-token-4-jkl', 'VERIFICATION', '2025-11-04 11:00:00', '2025-11-06 00:00:00'); -- kısa süreli
+(1, 'verif-token-1-abc', 'EMAIL_VERIFICATION', '2025-11-01 08:00:00', '2025-11-10 00:00:00'),
+(2, 'verif-token-2-def', 'EMAIL_VERIFICATION', '2025-11-02 09:00:00', '2025-10-01 00:00:00'), -- expired
+(3, 'password-token-3-ghi', 'PASSWORD_RESET', '2025-11-03 10:00:00', '2026-01-01 00:00:00'),
+(4, 'verif-token-4-jkl', 'EMAIL_VERIFICATION', '2025-11-04 11:00:00', '2025-11-06 00:00:00'); -- kısa süreli
 
 -- USERS_BLOCK örnek verileri
 INSERT INTO USERS_BLOCK (blocker_id, blocked_id, created_at) VALUES
