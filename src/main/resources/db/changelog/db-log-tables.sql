@@ -94,7 +94,7 @@ CREATE TABLE CONVERSATION (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_one_id BIGINT NOT NULL,
     user_two_id BIGINT NOT NULL,
-    product_id BIGINT,
+    product_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (user_one_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (user_two_id) REFERENCES users(id) ON DELETE SET NULL,
