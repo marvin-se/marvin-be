@@ -100,7 +100,12 @@ CREATE TABLE CONVERSATION (
     FOREIGN KEY (user_two_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE SET NULL
 );
-
+CREATE INDEX idx_conversation_user_one_id ON `CONVERSATION` (`user_one_id`);
+CREATE INDEX idx_conversation_user_two_id ON `CONVERSATION` (`user_two_id`);
+CREATE INDEX idx_conversation_product_id ON `CONVERSATION` (`product_id`);
+-- =====================
+-- USERS_BLOCK
+-- =====================
 CREATE TABLE USERS_BLOCK(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     blocker_id BIGINT NOT NULL,
@@ -109,3 +114,23 @@ CREATE TABLE USERS_BLOCK(
     FOREIGN KEY (blocker_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (blocked_id) REFERENCES users(id) ON DELETE CASCADE
 );
+CREATE INDEX idx_users_block_blocker_id ON `USERS_BLOCK` (`blocker_id`);
+CREATE INDEX idx_users_block_blocked_id ON `USERS_BLOCK` (`blocked_id`);
+-- =====================
+-- TRANSACTIONS
+-- =====================
+CREATE TABLE TRANSACTION (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    buyer_id BIGINT NOT NULL,
+    seller_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
+    FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE SET NULL,
+    UNIQUE (product_id)
+);
+CREATE UNIQUE INDEX idx_transaction_product_id ON `TRANSACTION` (`product_id`);
+CREATE INDEX idx_transaction_buyer_id ON `TRANSACTION` (`buyer_id`);
+CREATE INDEX idx_transaction_seller_id ON `TRANSACTION` (`seller_id`);
+
