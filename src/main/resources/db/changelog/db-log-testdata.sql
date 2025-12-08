@@ -5,13 +5,13 @@ INSERT INTO UNIVERSITY (name, domain, city) VALUES
 ('Bogazici University', 'boun.edu.tr', 'Istanbul'),
 ('Hacettepe University', 'hacettepe.edu.tr', 'Ankara');
 
-INSERT INTO USERS (full_name, profile_pic_url, email, password_hash, university_id, phone_number, created_at, is_active)
+INSERT INTO USERS (full_name, profile_pic_url, email, password_hash, university_id, phone_number, created_at, is_active , is_verified)
 VALUES
-('Ayşe Yılmaz', 'https://pics.com/p1.jpg', 'ayse@itu.edu.tr', 'hash123', 1, '5551112233', NOW(), TRUE),
-('Mehmet Demir', 'https://pics.com/p2.jpg', 'mehmet@metu.edu.tr', 'hash456', 2, '5554445566', NOW(), TRUE),
-('Elif Acar', NULL, 'elif@ytu.edu.tr', 'hash789', 3, '5558889977', NOW(), TRUE),
-('Can Koç', 'https://pics.com/p4.jpg', 'can@boun.edu.tr', 'hash101', 4, '5550909090', NOW(), TRUE),
-('Zeynep Er', NULL, 'zeynep@hacettepe.edu.tr', 'hash202', 5, '5553030303', NOW(), FALSE);
+('Ayşe Yılmaz', 'https://pics.com/p1.jpg', 'ayse@itu.edu.tr', 'hash123', 1, '5551112233', NOW(), TRUE, TRUE),
+('Mehmet Demir', 'https://pics.com/p2.jpg', 'mehmet@metu.edu.tr', 'hash456', 2, '5554445566', NOW(), TRUE, TRUE),
+('Elif Acar', NULL, 'elif@ytu.edu.tr', 'hash789', 3, '5558889977', NOW(), TRUE, TRUE),
+('Can Koç', 'https://pics.com/p4.jpg', 'can@boun.edu.tr', 'hash101', 4, '5550909090', NOW(), TRUE, TRUE),
+('Zeynep Er', NULL, 'zeynep@hacettepe.edu.tr', 'hash202', 5, '5553030303', NOW(), FALSE, TRUE);
 
 INSERT INTO PRODUCT (title, description, price, category, status, created_at, user_id, updated_at) VALUES
 ('Casio Scientific Calculator', 'Used but works perfectly.', 200, 'ELECTRONICS', 'AVAILABLE', NOW(), 1, NOW()),
