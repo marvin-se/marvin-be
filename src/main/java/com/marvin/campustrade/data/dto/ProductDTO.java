@@ -22,15 +22,16 @@ public class ProductDTO {
         @Size(max = 500, message = "Description cannot exceed 500 characters")
         private String description;
 
-        @NotBlank(message = "Price is required")
+        @NotNull(message = "Price is required")
         @DecimalMin(value = "0.0", inclusive = false, message = "Price must be positive")
         private BigDecimal price;
 
-        @NotBlank(message = "Category is required")
+        @NotNull(message = "Category is required")
         private Category category;
 
+        @NotNull(message = "Images cannot be null")
         @Size(min = 1, message = "At least one image must be provided")
-        private List<String> images;
+        private List<@NotBlank(message = "Image URL cannot be empty") String> images;
     }
 
     @Getter
