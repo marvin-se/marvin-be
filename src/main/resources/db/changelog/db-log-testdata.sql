@@ -53,11 +53,11 @@ INSERT INTO TRANSACTION (product_id, buyer_id, seller_id, created_at) VALUES
 (3, 5, 1, '2025-11-05 10:00:00');
 
 -- TOKEN örnek verileri (bazıları süresi geçmiş, bazıları geçerli)
-INSERT INTO TOKEN (user_id, content, type, created_at, expires_at) VALUES
-(1, 'verif-token-1-abc', 'EMAIL_VERIFICATION', '2025-11-01 08:00:00', '2025-11-10 00:00:00'),
-(2, 'verif-token-2-def', 'EMAIL_VERIFICATION', '2025-11-02 09:00:00', '2025-10-01 00:00:00'), -- expired
-(3, 'password-token-3-ghi', 'PASSWORD_RESET', '2025-11-03 10:00:00', '2026-01-01 00:00:00'),
-(4, 'verif-token-4-jkl', 'EMAIL_VERIFICATION', '2025-11-04 11:00:00', '2025-11-06 00:00:00'); -- kısa süreli
+INSERT INTO TOKEN (user_id, content, type, created_at, expires_at, is_verified) VALUES
+(1, 'verif-token-1-abc', 'EMAIL_VERIFICATION', '2025-11-01 08:00:00', '2025-11-10 00:00:00', TRUE),
+(2, 'verif-token-2-def', 'EMAIL_VERIFICATION', '2025-11-02 09:00:00', '2025-10-01 00:00:00', FALSE), -- expired
+(3, 'password-token-3-ghi', 'PASSWORD_RESET', '2025-11-03 10:00:00', '2026-01-01 00:00:00', TRUE),
+(4, 'verif-token-4-jkl', 'EMAIL_VERIFICATION', '2025-11-04 11:00:00', '2025-11-06 00:00:00', FALSE); -- kısa süreli
 
 -- USERS_BLOCK örnek verileri
 INSERT INTO USERS_BLOCK (blocker_id, blocked_id, created_at) VALUES

@@ -44,4 +44,7 @@ public class Token {
     @Column(name = "EXPIRES_AT", nullable = false)
     private LocalDateTime expiresAt;
 
+    @Column(name = "IS_VERIFIED", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isVerified = false;
+
 }
