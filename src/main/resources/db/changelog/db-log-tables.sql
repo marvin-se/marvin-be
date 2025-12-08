@@ -21,6 +21,7 @@ CREATE TABLE USERS (
     phone_number VARCHAR(50),
     created_at TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
+    is_verified BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (university_id) REFERENCES university(id)
 );
 CREATE INDEX idx_users_university_id ON `USERS` (`university_id`);
