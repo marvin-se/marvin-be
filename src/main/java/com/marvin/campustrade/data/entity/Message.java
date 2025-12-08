@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "MESSAGE",indexes = {
         @Index(columnList = "SENDER_ID"),
         @Index(columnList = "RECEIVER_ID"),
-        @Index(columnList = "PRODUCT_ID")
+        @Index(columnList = "CONVERSATION_ID")
 })
 @Setter
 @Getter
@@ -39,9 +39,9 @@ public class Message {
     @JoinColumn(name = "RECEIVER_ID")
     private Users receiver;
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "PRODUCT_ID")
-    private Product product;
+    @ManyToOne
+    @JoinColumn(name = "CONVERSATION_ID", nullable = false)
+    private Conversation conversation;
 
     @PrePersist
     protected void onCreate() {
