@@ -23,6 +23,15 @@ spring:
     enabled: true
     change-log: classpath:/db/changelog/master.yaml
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: zelihamelek.2004@gmail.com
+    password: grrl lkgf jcdp wfyh
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
 server:
   port: 8080
   servlet:
@@ -44,3 +53,6 @@ logging:
 
     # transaction events
     org.springframework.orm.jpa.JpaTransactionManager: DEBUG
+
+app:
+  base-url: http://localhost:8080

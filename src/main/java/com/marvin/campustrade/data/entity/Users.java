@@ -49,6 +49,9 @@ public class Users {
     @Column(name = "IS_ACTIVE", columnDefinition = "BOOLEAN DEFAULT TRUE")
     private Boolean isActive = true;
 
+    @Column(name = "IS_VERIFIED", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isVerified = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UNIVERSITY_ID", nullable = false)
     private University university;
