@@ -26,14 +26,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO.Response createProduct(ProductDTO.CreateRequest request) {
-        //Users user = userService.getCurrentUser();
-        Users testUser = userRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Test user missing"));
+        Users user = userService.getCurrentUser();
+        //Users testUser = userRepository.findById(1L)
+        //        .orElseThrow(() -> new RuntimeException("Test user missing"));
 
         // This won't work like that until login logic works properly,
         // use testUser when testing this instead
         Product product = productMapper.toEntity(request);
-        product.setUser(testUser);
+        product.setUser(user);
 
         Product saved = productRepository.save(product);    // added new ad to db
 

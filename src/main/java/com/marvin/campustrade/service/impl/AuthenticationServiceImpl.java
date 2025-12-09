@@ -6,14 +6,11 @@ import com.marvin.campustrade.data.entity.Users;
 import com.marvin.campustrade.data.mapper.UserMapper;
 import com.marvin.campustrade.repository.UserRepository;
 import com.marvin.campustrade.service.AuthenticationService;
-import com.marvin.campustrade.utils.JwtUtils;
+import com.marvin.campustrade.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
