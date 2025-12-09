@@ -1,5 +1,6 @@
 package com.marvin.campustrade.service.impl;
 
+import com.marvin.campustrade.data.dto.auth.LoginDTO;
 import com.marvin.campustrade.data.dto.auth.RegisterRequest;
 import com.marvin.campustrade.data.dto.auth.UserResponse;
 import com.marvin.campustrade.data.entity.University;
@@ -12,10 +13,14 @@ import com.marvin.campustrade.repository.UniversityRepository;
 import com.marvin.campustrade.repository.UserRepository;
 import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -62,5 +67,4 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
-
 }
