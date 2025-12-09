@@ -36,6 +36,9 @@ public class Users {
     @Column(name = "EMAIL", nullable = false)
     private String email;
 
+    @Column(name = "DESCRIPTION", length = 1000)
+    private String description;
+
     @JsonIgnore
     @Column(name = "PASSWORD_HASH", nullable = false)
     private String passwordHash;

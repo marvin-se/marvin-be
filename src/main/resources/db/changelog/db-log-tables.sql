@@ -15,6 +15,7 @@ CREATE TABLE USERS (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(200),
     profile_pic_url VARCHAR(300),
+    description VARCHAR(1000),
     email VARCHAR(200) NOT NULL UNIQUE,
     password_hash VARCHAR(300) NOT NULL,
     university_id BIGINT NOT NULL,
