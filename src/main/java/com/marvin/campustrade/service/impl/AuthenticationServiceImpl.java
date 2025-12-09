@@ -23,7 +23,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserMapper userMapper;
 
     public LoginDTO.LoginResponse login(String email, String password) {
-        Users user = userRepository.findByEmail(email).orElse(null);
+        Users user = userRepository.findByEmailWithUniversity(email).orElse(null);
 
         if(user != null && passwordEncoder.matches(password, user.getPasswordHash())) {
             String jwtToken = jwtUtils.generateToken(email);
