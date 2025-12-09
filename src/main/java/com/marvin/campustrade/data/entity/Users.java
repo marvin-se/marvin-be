@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @NoArgsConstructor
-@SQLDelete(sql = "UPDATE USER SET IS_ACTIVE = false WHERE ID = ?")
+@SQLDelete(sql = "UPDATE USERS SET IS_ACTIVE = false WHERE ID = ?")
 @Where(clause = "IS_ACTIVE = true")
 public class Users {
     @Id
@@ -35,6 +35,9 @@ public class Users {
 
     @Column(name = "EMAIL", nullable = false)
     private String email;
+
+    @Column(name = "DESCRIPTION", length = 1000)
+    private String description;
 
     @JsonIgnore
     @Column(name = "PASSWORD_HASH", nullable = false)
