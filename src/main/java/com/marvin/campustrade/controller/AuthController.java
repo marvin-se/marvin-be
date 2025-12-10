@@ -1,6 +1,7 @@
 package com.marvin.campustrade.controller;
 
 import com.marvin.campustrade.data.dto.auth.*;
+import com.marvin.campustrade.service.AuthenticationService;
 import com.marvin.campustrade.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
     private final UserService userService;
+    private final AuthenticationService authService;
+
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(userService.createUser(request));
@@ -35,13 +38,15 @@ public class AuthController {
         return ResponseEntity.ok("Code verified. You may now reset your password.");
     }
 
-
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePassword request) {
         userService.changePassword(request);
         return ResponseEntity.ok("Your password has been changed!");
     }
 
-
-
+    @PostMapping("/login")
+    public ResponseEntity<LoginDTO.LoginResponse> login(@Valid @RequestBody LoginDTO.LoginRequest request) {
+        LoginDTO.LoginResponse response = authService.login(request.getEmail(), request.getPassword());
+        return ResponseEntity.ok(response);
+    }
 }

@@ -16,6 +16,8 @@ import com.marvin.campustrade.repository.TokenRepository;
 import com.marvin.campustrade.service.EmailService;
 import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
