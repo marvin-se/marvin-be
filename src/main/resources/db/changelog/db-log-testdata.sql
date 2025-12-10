@@ -7,11 +7,15 @@ INSERT INTO UNIVERSITY (name, domain, city) VALUES
 
 INSERT INTO USERS (full_name, profile_pic_url, email, password_hash, university_id, phone_number, created_at, is_active , is_verified , description)
 VALUES
-('Ayşe Yılmaz', 'https://pics.com/p1.jpg', 'ayse@itu.edu.tr', 'hash123', 1, '5551112233', NOW(), TRUE, TRUE, 'Computer Engineering student at ITU. Interested in electronics and gadgets.'),
+('Ayşe Yılmaz', 'https://pics.com/p1.jpg', 'ayse@itu.edu.tr', '$2a$10$KCujF5.G02ciqrK44bP4v.5BZcuEV/4qQnkHyGQ8lBOkqmg6nAj62', 1, '5551112233', NOW(), TRUE, TRUE, 'Computer Engineering student at ITU. Interested in electronics and gadgets.'),
 ('Mehmet Demir', 'https://pics.com/p2.jpg', 'mehmet@metu.edu.tr', 'hash456', 2, '5554445566', NOW(), TRUE, TRUE, 'Mechanical Engineering student at METU. Loves furniture and home decor.'),
 ('Elif Acar', NULL, 'elif@ytu.edu.tr', 'hash789', 3, '5558889977', NOW(), TRUE, TRUE, 'Industrial Design student at YTU. Passionate about stationery and art supplies.'),
 ('Can Koç', 'https://pics.com/p4.jpg', 'can@boun.edu.tr', 'hash101', 4, '5550909090', NOW(), TRUE, TRUE, 'Economics student at Bogazici University. Enjoys reading and writing.'),
-('Zeynep Er', NULL, 'zeynep@hacettepe.edu.tr', 'hash202', 5, '5553030303', NOW(), FALSE, TRUE, 'Medicine student at Hacettepe University. Interested in health and wellness products.');
+('Zeynep Er', NULL, 'zeynep@hacettepe.edu.tr', 'hash202', 5, '5553030303', NOW(), FALSE, TRUE, 'Medicine student at Hacettepe University. Interested in health and wellness products.'),
+('Hilal Kartal', NULL, 'kartalh21@itu.edu.tr', '$2a$10$KCujF5.G02ciqrK44bP4v.5BZcuEV/4qQnkHyGQ8lBOkqmg6nAj62', 1, '5383740242', '2025-12-10T16:43:36.8779941', TRUE, TRUE, 'Architecture student at ITU. Loves design and creativity.'),
+('Selin Yılmaz', NULL, 'yilmazsel21@itu.edu.tr', '$2a$10$KCujF5.G02ciqrK44bP4v.5BZcuEV/4qQnkHyGQ8lBOkqmg6nAj62', 1, '5383740242', '2025-12-10T16:43:36.8779941', TRUE, TRUE, NULL),
+('Zeliha Melek Bekdemir', NULL, 'bekdemir22@itu.edu.tr', '$2a$10$KCujF5.G02ciqrK44bP4v.5BZcuEV/4qQnkHyGQ8lBOkqmg6nAj62', 1, '5383740242', '2025-12-10T16:43:36.8779941', TRUE, TRUE, NULL),
+('Alper Daşgın', NULL, 'dasgin21@itu.edu.tr', '$2a$10$KCujF5.G02ciqrK44bP4v.5BZcuEV/4qQnkHyGQ8lBOkqmg6nAj62', 1, '5383740242', '2025-12-10T16:43:36.8779941', TRUE, TRUE, NULL);
 
 INSERT INTO PRODUCT (title, description, price, category, status, created_at, user_id, updated_at) VALUES
 ('Casio Scientific Calculator', 'Used but works perfectly.', 200, 'ELECTRONICS', 'AVAILABLE', NOW(), 1, NOW()),
