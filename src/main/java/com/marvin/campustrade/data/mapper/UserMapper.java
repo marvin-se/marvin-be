@@ -16,7 +16,8 @@ public interface UserMapper {
     @Mapping(target = "profilePicUrl", ignore = true)
     Users toEntity(RegisterRequest request);
 
-    //@Mapping(target = "university", ignore = true)
+    @Mapping(target = "universityId", source = "university.id")
+    @Mapping(target = "universityName", source = "university.name")
     UserResponse toResponse(Users user);
 
 }
