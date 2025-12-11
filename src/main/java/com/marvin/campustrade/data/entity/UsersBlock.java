@@ -9,10 +9,10 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "USERS_BLOCK",
+@Table(name = "users_block",
         indexes = {
-                @Index(columnList = "BLOCKER_ID"),
-                @Index(columnList = "BLOCKED_ID")
+                @Index(columnList = "blocker_id"),
+                @Index(columnList = "blocked_id")
         })
 @Setter
 @Getter
@@ -24,14 +24,14 @@ public class UsersBlock {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "BLOCKER_ID", nullable = false)
+    @JoinColumn(name = "blocker_id", nullable = false)
     private Users blocker;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "BLOCKED_ID", nullable = false)
+    @JoinColumn(name = "blocked_id", nullable = false)
     private Users blocked;
 
-    @Column(name = "CREATED_AT")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @PrePersist

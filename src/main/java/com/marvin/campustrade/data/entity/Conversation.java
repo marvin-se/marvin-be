@@ -8,11 +8,11 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "CONVERSATION",
+@Table(name = "conversation",
         indexes = {
-                @Index(columnList = "USER_ONE_ID"),
-                @Index(columnList = "USER_TWO_ID"),
-                @Index(columnList = "PRODUCT_ID")
+                @Index(columnList = "user_one_id"),
+                @Index(columnList = "user_two_id"),
+                @Index(columnList = "product_id")
         })
 @Setter
 @Getter
@@ -24,18 +24,18 @@ public class Conversation {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "USER_ONE_ID", nullable = false)
+    @JoinColumn(name = "user_one_id")
     private Users user1;
 
     @ManyToOne
-    @JoinColumn(name = "USER_TWO_ID", nullable = false)
+    @JoinColumn(name = "user_two_id")
     private Users user2;
 
     @ManyToOne
-    @JoinColumn(name = "PRODUCT_ID", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 
-    @Column(name = "CREATED_AT")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @PrePersist

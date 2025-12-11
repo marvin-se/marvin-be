@@ -1,17 +1,17 @@
 -- =====================
 -- UNIVERSITIES
 -- =====================
-CREATE TABLE UNIVERSITY (
+CREATE TABLE university (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
-    domain VARCHAR(200) NOT NULL,
+    uni_domain VARCHAR(200) NOT NULL,
     city VARCHAR(100) NOT NULL
 );
 
 -- =====================
 -- USERS
 -- =====================
-CREATE TABLE USERS (
+CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(200),
     profile_pic_url VARCHAR(300),
@@ -25,11 +25,11 @@ CREATE TABLE USERS (
     is_verified BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (university_id) REFERENCES university(id)
 );
-CREATE INDEX idx_users_university_id ON `USERS` (`university_id`);
+CREATE INDEX idx_users_university_id ON `users` (`university_id`);
 -- =====================
 -- PRODUCTS
 -- =====================
-CREATE TABLE PRODUCT (
+CREATE TABLE product (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description VARCHAR(500),
@@ -41,54 +41,54 @@ CREATE TABLE PRODUCT (
     updated_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-CREATE INDEX idx_product_user_id ON `PRODUCT` (`user_id`);
-CREATE INDEX idx_product_category ON `PRODUCT` (`category`);
-CREATE INDEX idx_product_status ON `PRODUCT` (`status`);
+CREATE INDEX idx_product_user_id ON `product` (`user_id`);
+CREATE INDEX idx_product_category ON `product` (`category`);
+CREATE INDEX idx_product_status ON `product` (`status`);
 
 -- =====================
 -- IMAGES
 -- =====================
-CREATE TABLE IMAGE (
+CREATE TABLE image (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id BIGINT NOT NULL,
     image_url VARCHAR(500) NOT NULL,
     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
 );
-CREATE INDEX idx_image_product_id ON `IMAGE` (`product_id`);
+CREATE INDEX idx_image_product_id ON `image` (`product_id`);
 
 -- =====================
 -- FAVOURITES
 -- =====================
-CREATE TABLE FAVOURITE (
+CREATE TABLE favourite (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE INDEX idx_favourite_product_id ON `FAVOURITE` (`product_id`);
-CREATE INDEX idx_favourite_user_id ON `FAVOURITE` (`user_id`);
+CREATE INDEX idx_favourite_product_id ON `favourite` (`product_id`);
+CREATE INDEX idx_favourite_user_id ON `favourite` (`user_id`);
 
 -- =====================
 -- CONVERSATION
 -- =====================
-CREATE TABLE CONVERSATION (
+CREATE TABLE conversation (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_one_id BIGINT NOT NULL,
-    user_two_id BIGINT NOT NULL,
-    product_id BIGINT NOT NULL,
+    user_one_id BIGINT,
+    user_two_id BIGINT,
+    product_id BIGINT,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (user_one_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (user_two_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE SET NULL
 );
-CREATE INDEX idx_conversation_user_one_id ON `CONVERSATION` (`user_one_id`);
-CREATE INDEX idx_conversation_user_two_id ON `CONVERSATION` (`user_two_id`);
-CREATE INDEX idx_conversation_product_id ON `CONVERSATION` (`product_id`);
+CREATE INDEX idx_conversation_user_one_id ON `conversation` (`user_one_id`);
+CREATE INDEX idx_conversation_user_two_id ON `conversation` (`user_two_id`);
+CREATE INDEX idx_conversation_product_id ON `conversation` (`product_id`);
 -- =====================
 -- MESSAGES
 -- =====================
-CREATE TABLE MESSAGE (
+CREATE TABLE message (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     sender_id BIGINT,
     receiver_id BIGINT,
@@ -103,13 +103,13 @@ CREATE TABLE MESSAGE (
     --FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE SET NULL
 );
 -- INDEX idx_message_product_id ON `MESSAGE` (`product_id`);
-CREATE INDEX idx_message_conversation_id ON `MESSAGE` (`conversation_id`);
-CREATE INDEX idx_message_sender_id ON `MESSAGE` (`sender_id`);
-CREATE INDEX idx_message_receiver_id ON `MESSAGE` (`receiver_id`);
+CREATE INDEX idx_message_conversation_id ON `message` (`conversation_id`);
+CREATE INDEX idx_message_sender_id ON `message` (`sender_id`);
+CREATE INDEX idx_message_receiver_id ON `message` (`receiver_id`);
 -- =====================
 -- USERS_BLOCK
 -- =====================
-CREATE TABLE USERS_BLOCK(
+CREATE TABLE users_block(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     blocker_id BIGINT NOT NULL,
     blocked_id BIGINT NOT NULL,
@@ -117,30 +117,30 @@ CREATE TABLE USERS_BLOCK(
     FOREIGN KEY (blocker_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (blocked_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE INDEX idx_users_block_blocker_id ON `USERS_BLOCK` (`blocker_id`);
-CREATE INDEX idx_users_block_blocked_id ON `USERS_BLOCK` (`blocked_id`);
+CREATE INDEX idx_users_block_blocker_id ON `users_block` (`blocker_id`);
+CREATE INDEX idx_users_block_blocked_id ON `users_block` (`blocked_id`);
 -- =====================
 -- TRANSACTIONS
 -- =====================
-CREATE TABLE TRANSACTION (
+CREATE TABLE transactions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id BIGINT NOT NULL,
-    buyer_id BIGINT NOT NULL,
-    seller_id BIGINT NOT NULL,
+    buyer_id BIGINT,
+    seller_id BIGINT,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
     FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE SET NULL,
     UNIQUE (product_id)
 );
-CREATE UNIQUE INDEX idx_transaction_product_id ON `TRANSACTION` (`product_id`);
-CREATE INDEX idx_transaction_buyer_id ON `TRANSACTION` (`buyer_id`);
-CREATE INDEX idx_transaction_seller_id ON `TRANSACTION` (`seller_id`);
+CREATE UNIQUE INDEX idx_transactions_product_id ON `transactions` (`product_id`);
+CREATE INDEX idx_transactions_buyer_id ON `transactions` (`buyer_id`);
+CREATE INDEX idx_transactions_seller_id ON `transactions` (`seller_id`);
 
 -- =====================
 -- TOKENS
 -- =====================
-CREATE TABLE TOKEN (
+CREATE TABLE token (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
     content VARCHAR(500) NOT NULL,
@@ -151,4 +151,4 @@ CREATE TABLE TOKEN (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_token_user_id ON `TOKEN` (`user_id`);
+CREATE INDEX idx_token_user_id ON `token` (`user_id`);
