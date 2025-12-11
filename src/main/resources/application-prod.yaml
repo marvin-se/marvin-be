@@ -9,14 +9,15 @@ spring:
 
   h2:
     console:
-      enabled: true
-      path: /h2-console
+      enabled: false
+
 
   datasource:
-    url: jdbc:h2:mem:campustrade_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: test
-    password: test
+    url: jdbc:mysql://marvim-test.cvykiq06g0wo.eu-north-1.rds.amazonaws.com:3306/campustrade?useSSL=false&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: admin
+    password: marvinTestDb
+
 
   liquibase:
     enabled: true

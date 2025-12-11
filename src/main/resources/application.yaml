@@ -2,6 +2,11 @@ spring:
   profiles:
     active: dev   # local development için default profil
 
-
+# dünyanon en eski commenti artık ne diyo bilmiyom
 # bunu sonra prodda envirment var ile override edeceğiz.
 # SPRING_PROFILES_ACTIVE=prod
+################################
+
+
+
+
