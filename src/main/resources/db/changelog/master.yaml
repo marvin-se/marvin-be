@@ -1,5 +1,27 @@
+#databaseChangeLog:
+#  - include:
+#      file: db/changelog/db-log-tables.sql
+  #- include:
+  #    file: db/changelog/db-log-testdata.sql
+
+
 databaseChangeLog:
-  - include:
-      file: db/changelog/db-log-tables.sql
-  - include:
-      file: db/changelog/db-log-testdata.sql
+  - changeSet:
+      id: 001
+      author: Hilal Kartal
+      changes:
+        - sqlFile:
+            path: classpath:db/changelog/db-log-tables.sql
+            splitStatements: true
+            endDelimiter: ";"
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: 002
+      author: Hilal Kartal
+      changes:
+        - sqlFile:
+            path: classpath:db/changelog/db-log-universities.sql
+            splitStatements: true
+            endDelimiter: ";"
+            relativeToChangelogFile: false
