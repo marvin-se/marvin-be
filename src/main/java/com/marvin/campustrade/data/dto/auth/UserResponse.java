@@ -9,8 +9,11 @@ public record UserResponse(
         String fullName,
         String email,
         String phoneNumber,
-        University university,
+        Long universityId,
+        String universityName,
         String profilePicUrl,
         LocalDateTime createdAt,
         Boolean isActive
-) {}
+) {
+}
+
