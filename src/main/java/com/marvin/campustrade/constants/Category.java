@@ -6,5 +6,7 @@ public enum Category {
     FASHION,
     HOME,
     SPORTS,
-    OTHER
+    OTHER,
+    STATIONERY,
+    FURNITURE
 }
