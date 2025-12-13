@@ -5,6 +5,7 @@ import com.marvin.campustrade.data.entity.Image;
 import com.marvin.campustrade.data.entity.Product;
 import com.marvin.campustrade.data.entity.Users;
 import com.marvin.campustrade.data.mapper.ProductMapper;
+import com.marvin.campustrade.exception.ProductNotFoundException;
 import com.marvin.campustrade.repository.ImageRepository;
 import com.marvin.campustrade.repository.ProductRepository;
 import com.marvin.campustrade.repository.UserRepository;
@@ -51,5 +52,21 @@ public class ProductServiceImpl implements ProductService {
         response.setImages(urls);
 
         return response;
+    }
+
+    @Override
+    public List<ProductDTO.Response> getAllProducts() {
+        return productRepository.findAll()
+                .stream()
+                .map(productMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public ProductDTO.Response getProductById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        return productMapper.toResponse(product);
     }
 }
