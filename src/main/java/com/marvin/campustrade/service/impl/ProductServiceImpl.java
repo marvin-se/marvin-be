@@ -8,7 +8,6 @@ import com.marvin.campustrade.data.mapper.ProductMapper;
 import com.marvin.campustrade.exception.ProductNotFoundException;
 import com.marvin.campustrade.repository.ImageRepository;
 import com.marvin.campustrade.repository.ProductRepository;
-import com.marvin.campustrade.repository.UserRepository;
 import com.marvin.campustrade.service.ProductService;
 import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
