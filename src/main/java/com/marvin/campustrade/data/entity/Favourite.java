@@ -6,12 +6,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "FAVOURITE", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"USER_ID", "PRODUCT_ID"})
+@Table(name = "favourite", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "product_id"})
         },
         indexes = {
-                @Index(columnList = "USER_ID"),
-                @Index(columnList = "PRODUCT_ID")
+                @Index(columnList = "user_id"),
+                @Index(columnList = "product_id")
         })
 @Setter
 @Getter
@@ -23,10 +23,10 @@ public class Favourite {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "USER_ID", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "PRODUCT_ID", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 }
