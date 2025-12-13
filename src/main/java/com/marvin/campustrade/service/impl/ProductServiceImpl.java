@@ -21,7 +21,6 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-    private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final UserService userService;
 

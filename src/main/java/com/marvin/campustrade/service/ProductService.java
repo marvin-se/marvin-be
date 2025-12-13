@@ -1,7 +1,6 @@
 package com.marvin.campustrade.service;
 
 import com.marvin.campustrade.data.dto.ProductDTO;
-import com.marvin.campustrade.data.entity.Product;
 
 import java.util.List;
 

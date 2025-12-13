@@ -2,7 +2,6 @@ package com.marvin.campustrade.controller;
 
 import com.marvin.campustrade.data.dto.ProductDTO;
 import com.marvin.campustrade.service.ProductService;
-import com.marvin.campustrade.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
