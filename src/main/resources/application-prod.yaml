@@ -1,0 +1,62 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none   # managed by liquibase
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  h2:
+    console:
+      enabled: false
+
+
+  datasource:
+    url: jdbc:mysql://marvim-test.cvykiq06g0wo.eu-north-1.rds.amazonaws.com:3306/campustrade?useSSL=false&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: admin
+    password: marvinTestDb
+
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/master.yaml
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: zelihamelek.2004@gmail.com
+    password: grrl lkgf jcdp wfyh
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /campustrade
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+  level:
+    root: INFO
+    com.marvin.campustrade: DEBUG
+
+    # SQL queries
+    org.hibernate.SQL: DEBUG
+
+    # SQL bind parameters
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+    # transaction events
+    org.springframework.orm.jpa.JpaTransactionManager: DEBUG
+
+jwt:
+  secret: "2XZCFnmx0gac6Obn7LVsXtxpT36eCKJBGEbXg3luFuN2"
+  expiration: 360000
+
+app:
+  base-url: http://localhost:8080
