@@ -19,4 +19,8 @@ public interface UserService {
     ProfileResponse getUser(String id);
     BlockResponse blockUser(String id);
     BlockResponse unblockUser(String id);
+
+    //hilal filter testi silebilirsiniz
+    UserResponse findActiveUserByEamil(String email);
+    UserResponse findInActiveUserByEmail(String email);
 }

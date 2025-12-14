@@ -1,5 +1,6 @@
 package com.marvin.campustrade.service.impl;
 
+import com.marvin.campustrade.common.IncludeInactiveUsers;
 import com.marvin.campustrade.constants.RequestType;
 import com.marvin.campustrade.constants.TokenType;
 import com.marvin.campustrade.data.dto.auth.*;
@@ -27,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -299,4 +301,18 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    ////hilal filter testi silebilirsiniz
+    //includeInactive'i koymadım yani active olmayan user hata vermeli
+    @Override
+    public UserResponse findActiveUserByEamil(String email){
+        return userMapper.toResponse(userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found")));
+    }
+
+    //active olmayan user dönmeli
+    @Override
+    @IncludeInactiveUsers
+    @Transactional //have to be transactional because of the custom aspect (IncludeInactiveUsers)
+    public UserResponse findInActiveUserByEmail(String email){
+        return userMapper.toResponse(userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found")));
+    }
 }

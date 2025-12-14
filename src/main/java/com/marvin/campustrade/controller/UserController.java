@@ -4,7 +4,6 @@ import com.marvin.campustrade.data.dto.auth.UserResponse;
 import com.marvin.campustrade.data.dto.user.BlockResponse;
 import com.marvin.campustrade.data.dto.user.EditProfileRequest;
 import com.marvin.campustrade.data.dto.user.ProfileResponse;
-import com.marvin.campustrade.data.entity.Users;
 import com.marvin.campustrade.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
+
     @GetMapping("/me")
     //Turning User Response with full info because without token this info can not be seen, so
     //I do not think there is a security risk here
@@ -47,6 +48,21 @@ public class UserController {
     @DeleteMapping("/{userId}/unblock")
     public ResponseEntity<BlockResponse> unblockUser(@PathVariable("userId") String userId) {
         return ResponseEntity.ok(userService.unblockUser(userId));
+    }
+
+
+    //hilal filter test için silebilirsiniz
+    @GetMapping("/get-active-user/{email}")
+    public ResponseEntity<UserResponse> getActiveUser(@PathVariable String email){
+        UserResponse ActiveUser = userService.findActiveUserByEamil(email);
+        return ResponseEntity.ok(ActiveUser);
+    }
+
+    //hilal filter test için silebilirsiniz
+    @GetMapping("/get-inactive-user/{email}")
+    public ResponseEntity<UserResponse> getInactiveUserFalse(@PathVariable String email){
+        UserResponse inActiveUser = userService.findInActiveUserByEmail(email);
+        return ResponseEntity.ok(inActiveUser);
     }
 
 

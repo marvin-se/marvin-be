@@ -2,11 +2,12 @@ package com.marvin.campustrade.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 
 import java.time.LocalDateTime;
@@ -20,7 +21,15 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @SQLDelete(sql = "UPDATE users SET is_active = false WHERE id = ?")
-@Where(clause = "is_active = true")
+//@Where(clause = "is_active = true")
+@FilterDef(
+        name = "activeUserFilter",
+        parameters = @ParamDef(name = "isActive", type = Boolean.class)
+)
+@Filter(
+        name = "activeUserFilter",
+        condition = "is_active = :isActive"
+)
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
