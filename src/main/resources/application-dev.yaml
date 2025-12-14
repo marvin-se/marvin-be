@@ -1,5 +1,4 @@
 spring:
-
   jpa:
     hibernate:
       ddl-auto: none   # managed by liquibase
@@ -53,6 +52,10 @@ logging:
 
     # transaction events
     org.springframework.orm.jpa.JpaTransactionManager: DEBUG
+
+jwt:
+  secret: "2XZCFnmx0gac6Obn7LVsXtxpT36eCKJBGEbXg3luFuN2"
+  expiration: 360000
 
 app:
   base-url: http://localhost:8080

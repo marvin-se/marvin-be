@@ -3,9 +3,15 @@ package com.marvin.campustrade.service.impl;
 import com.marvin.campustrade.constants.RequestType;
 import com.marvin.campustrade.constants.TokenType;
 import com.marvin.campustrade.data.dto.auth.*;
+import com.marvin.campustrade.data.dto.user.BlockResponse;
+import com.marvin.campustrade.data.dto.user.EditProfileRequest;
+import com.marvin.campustrade.data.dto.user.ProfileResponse;
 import com.marvin.campustrade.data.entity.University;
 import com.marvin.campustrade.data.entity.Users;
 import com.marvin.campustrade.data.entity.Token;
+import com.marvin.campustrade.data.entity.UsersBlock;
+import com.marvin.campustrade.data.mapper.BlockMapper;
+import com.marvin.campustrade.data.mapper.ProfileMapper;
 import com.marvin.campustrade.data.mapper.UserMapper;
 import com.marvin.campustrade.exception.EmailAlreadyExistsException;
 import com.marvin.campustrade.exception.InvalidStudentEmailDomainException;
@@ -13,6 +19,7 @@ import com.marvin.campustrade.exception.UniversityNotFoundException;
 import com.marvin.campustrade.repository.UniversityRepository;
 import com.marvin.campustrade.repository.UserRepository;
 import com.marvin.campustrade.repository.TokenRepository;
+import com.marvin.campustrade.repository.UsersBlockRepository;
 import com.marvin.campustrade.service.EmailService;
 import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Random;
-import java.util.UUID;
+import java.util.logging.LogManager;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +41,9 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final EmailService emailService;
+    private final ProfileMapper  profileMapper;
+    private final UsersBlockRepository usersBlockRepository;
+    private final BlockMapper blockMapper;
 
     @Override
     public UserResponse createUser(RegisterRequest request){
@@ -180,5 +190,113 @@ public class UserServiceImpl implements UserService {
             tokenRepository.delete(token);
         }
     }
+
+    @Override
+    public UserResponse getCurrentProfile(){
+        Users user = getCurrentUser();
+        if(!(user.getIsVerified() && user.getIsActive())){
+            throw new RuntimeException("User is not valid for this function");
+        }
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public UserResponse editProfile(EditProfileRequest request){
+        System.out.println("Editing profile: " + request);
+        Users user = getCurrentUser();
+        System.out.println("Current user: " + user);
+        if(!(user.getIsVerified() && user.getIsActive())){
+            throw new RuntimeException("User is not valid for this function");
+        }
+        user.setFullName(request.getFullName());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setDescription(request.getDescription());
+        userRepository.save(user);
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public void deleteProfile(){
+        Users user = getCurrentUser();
+        if(!(user.getIsVerified() && user.getIsActive())){
+            throw new RuntimeException("User is not valid for this function");
+        }
+        user.setIsActive(false);
+        userRepository.delete(user);
+    }
+
+    @Override
+    public ProfileResponse getUser(String id) {
+
+        Users viewer = getCurrentUser();
+        if (!viewer.getIsActive() || !viewer.getIsVerified()) {
+            throw new RuntimeException("You are not allowed to view profiles");
+        }
+
+        Long userId = Long.parseLong(id);
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getIsActive() || !user.getIsVerified()) {
+            throw new RuntimeException("This profile is not available");
+        }
+
+        return profileMapper.toResponse(user);
+    }
+
+    @Override
+    public BlockResponse blockUser(String id) {
+        Users blocker = getCurrentUser();
+
+        if (!blocker.getIsActive() || !blocker.getIsVerified()) {
+            throw new RuntimeException("You are not allowed to block profiles");
+        }
+
+        Long userId = Long.parseLong(id);
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getIsActive() || !user.getIsVerified()) {
+            throw new RuntimeException("This profile is not available");
+        }
+
+        if (usersBlockRepository.findByBlockerAndBlocked(blocker, user).isPresent()) {
+            throw new RuntimeException("This user is already blocked.");
+        }
+
+        UsersBlock blocking = new UsersBlock();
+        blocking.setBlocker(blocker);
+        blocking.setBlocked(user);
+        usersBlockRepository.save(blocking);
+
+        return blockMapper.toBlock(user);
+    }
+
+    @Override
+    public BlockResponse unblockUser(String id) {
+        Users blocker = getCurrentUser();
+
+        if (!blocker.getIsActive() || !blocker.getIsVerified()) {
+            throw new RuntimeException("You are not allowed to block profiles");
+        }
+
+        Long userId = Long.parseLong(id);
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getIsActive() || !user.getIsVerified()) {
+            throw new RuntimeException("This profile is not available");
+        }
+
+        UsersBlock blocking = usersBlockRepository.findByBlockerAndBlocked(blocker, user)
+                .orElseThrow(() -> new RuntimeException("This user is not blocked"));
+
+        usersBlockRepository.delete(blocking);
+
+        return blockMapper.toBlock(user);
+    }
+
 
 }
