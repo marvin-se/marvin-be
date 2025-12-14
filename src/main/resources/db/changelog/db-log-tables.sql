@@ -93,16 +93,13 @@ CREATE TABLE message (
     sender_id BIGINT,
     receiver_id BIGINT,
     conversation_id BIGINT,
-    --product_id BIGINT,
     content TEXT,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
     sent_at TIMESTAMP NOT NULL,
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (conversation_id) REFERENCES conversation(id) ON DELETE CASCADE
-    --FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE SET NULL
 );
--- INDEX idx_message_product_id ON `MESSAGE` (`product_id`);
 CREATE INDEX idx_message_conversation_id ON `message` (`conversation_id`);
 CREATE INDEX idx_message_sender_id ON `message` (`sender_id`);
 CREATE INDEX idx_message_receiver_id ON `message` (`receiver_id`);
