@@ -49,5 +49,4 @@ public class UserController {
         return ResponseEntity.ok(userService.unblockUser(userId));
     }
 
-
 }
