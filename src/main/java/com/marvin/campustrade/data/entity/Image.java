@@ -6,9 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "IMAGE",
+@Table(name = "image",
 indexes = {
-                @Index(columnList = "PRODUCT_ID")
+                @Index(columnList = "product_id")
         })
 @Setter
 @Getter
@@ -19,11 +19,11 @@ public class Image {
     @Column(updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "IMAGE_URL", nullable = false, length = 500)
+    @Column(name = "image_url", nullable = false, length = 500)
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PRODUCT_ID", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
 }

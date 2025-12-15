@@ -1,8 +1,15 @@
 package com.marvin.campustrade.service;
 
 import com.marvin.campustrade.data.dto.ProductDTO;
-import com.marvin.campustrade.data.entity.Product;
+
+import java.util.List;
 
 public interface ProductService {
     ProductDTO.Response createProduct(ProductDTO.CreateRequest request);
+    List<ProductDTO.Response> getAllProducts();
+    ProductDTO.Response getProductById(Long id);
+    void deleteProduct(Long id, Long sellerId);
+    ProductDTO.Response updateProduct(Long id, ProductDTO.UpdateRequest request,Long sellerId);
+    ProductDTO.Response markAsSold(Long id, Long sellerId);
+    List<ProductDTO.Response> getSellerProducts(Long sellerId, Long currentUserId);
 }

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "UNIVERSITY")
+@Table(name = "university")
 @Setter
 @Getter
 @NoArgsConstructor
@@ -16,13 +16,13 @@ public class University {
     @Column(updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "DOMAIN", nullable = false)
+    @Column(name = "uni_domain", nullable = false)
     private String domain;
 
-    @Column(name = "CITY", nullable = false)
+    @Column(name = "city", nullable = false)
     private String city;
 
 }

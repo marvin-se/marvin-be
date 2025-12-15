@@ -4,9 +4,9 @@ public enum Category {
     ELECTRONICS,
     BOOKS,
     FASHION,
-    FURNITURE,
     HOME,
     SPORTS,
+    OTHER,
     STATIONERY,
-    OTHER
+    FURNITURE
 }
