@@ -4,6 +4,7 @@ import com.marvin.campustrade.data.dto.auth.LoginDTO;
 import com.marvin.campustrade.data.dto.auth.UserResponse;
 import com.marvin.campustrade.data.entity.Users;
 import com.marvin.campustrade.data.mapper.UserMapper;
+import com.marvin.campustrade.exception.AuthenticationLoginException;
 import com.marvin.campustrade.repository.UserRepository;
 import com.marvin.campustrade.service.AuthenticationService;
 import com.marvin.campustrade.security.JwtUtils;
@@ -21,7 +22,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserMapper userMapper;
 
     public LoginDTO.LoginResponse login(String email, String password) {
-        Users user = userRepository.findByEmailWithUniversity(email).orElse(null);
+        Users user = userRepository.findByEmailWithUniversity(email)
+                .orElseThrow(() -> new AuthenticationLoginException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+            throw new AuthenticationLoginException("Invalid email or password");
+        }
 
         if (user == null) {
             throw new UsernameNotFoundException("User not found");

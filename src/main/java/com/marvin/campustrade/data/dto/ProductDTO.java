@@ -38,6 +38,24 @@ public class ProductDTO {
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class UpdateRequest {
+        @Size(max = 100, message = "Title cannot exceed 100 characters")
+        private String title;
+
+        @Size(max = 500, message = "Description cannot exceed 500 characters")
+        private String description;
+
+        @DecimalMin(value = "0.0", inclusive = false, message = "Price must be positive")
+        private BigDecimal price;
+
+        @Size(min = 1, message = "At least one image must be provided")
+        private List<@NotBlank(message = "Image URL cannot be empty") String> images;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Response {
         private Long id;
         private String title;
@@ -46,6 +64,10 @@ public class ProductDTO {
         private Category category;
         private String universityName;
         private List<String> images;
+
+        // OWNER ONLY
+        private Integer favoriteCount;
+        private Integer visitCount;
     }
 
 }
