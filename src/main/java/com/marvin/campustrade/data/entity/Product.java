@@ -42,6 +42,12 @@ public class Product {
     @Column(name = "status", nullable = false)
     private Status status;
 
+    @Column(name = "fav_count", nullable = false)
+    private Long favoriteCount = 0L;
+
+    @Column(name = "visit_count", nullable = false)
+    private Long visitCount = 0L;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

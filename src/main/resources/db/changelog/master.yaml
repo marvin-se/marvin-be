@@ -25,3 +25,13 @@ databaseChangeLog:
             splitStatements: true
             endDelimiter: ";"
             relativeToChangelogFile: false
+
+  - changeSet:
+      id: 003
+      author: Hilal Kartal
+      changes:
+        - sqlFile:
+            path: classpath:db/changelog/db-log-tables-v2.sql
+            splitStatements: true
+            endDelimiter: ";"
+            relativeToChangelogFile: false
