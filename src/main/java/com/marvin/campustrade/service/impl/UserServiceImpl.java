@@ -4,23 +4,16 @@ import com.marvin.campustrade.common.IncludeInactiveUsers;
 import com.marvin.campustrade.constants.RequestType;
 import com.marvin.campustrade.constants.TokenType;
 import com.marvin.campustrade.data.dto.auth.*;
-import com.marvin.campustrade.data.dto.user.BlockResponse;
-import com.marvin.campustrade.data.dto.user.EditProfileRequest;
-import com.marvin.campustrade.data.dto.user.ProfileResponse;
-import com.marvin.campustrade.data.entity.University;
-import com.marvin.campustrade.data.entity.Users;
-import com.marvin.campustrade.data.entity.Token;
-import com.marvin.campustrade.data.entity.UsersBlock;
+import com.marvin.campustrade.data.dto.user.*;
+import com.marvin.campustrade.data.entity.*;
 import com.marvin.campustrade.data.mapper.BlockMapper;
 import com.marvin.campustrade.data.mapper.ProfileMapper;
+import com.marvin.campustrade.data.mapper.TransactionMapper;
 import com.marvin.campustrade.data.mapper.UserMapper;
 import com.marvin.campustrade.exception.EmailAlreadyExistsException;
 import com.marvin.campustrade.exception.InvalidStudentEmailDomainException;
 import com.marvin.campustrade.exception.UniversityNotFoundException;
-import com.marvin.campustrade.repository.UniversityRepository;
-import com.marvin.campustrade.repository.UserRepository;
-import com.marvin.campustrade.repository.TokenRepository;
-import com.marvin.campustrade.repository.UsersBlockRepository;
+import com.marvin.campustrade.repository.*;
 import com.marvin.campustrade.service.EmailService;
 import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 import java.util.logging.LogManager;
 
@@ -46,6 +40,8 @@ public class UserServiceImpl implements UserService {
     private final ProfileMapper  profileMapper;
     private final UsersBlockRepository usersBlockRepository;
     private final BlockMapper blockMapper;
+    private final TransactionRepository  transactionRepository;
+    private final TransactionMapper  transactionMapper;
 
     @Override
     public UserResponse createUser(RegisterRequest request){
@@ -163,7 +159,6 @@ public class UserServiceImpl implements UserService {
     public void changePassword(ChangePassword request) {
 
         if (request.getType() == RequestType.FORGOT_PASSWORD) {
-
             Users user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -190,6 +185,20 @@ public class UserServiceImpl implements UserService {
 
             // Delete token after successful password reset
             tokenRepository.delete(token);
+        }
+        if(request.getType() == RequestType.CHANGE_PASSWORD){
+            Users user = getCurrentUser();
+            if(!(user.getIsVerified() && user.getIsActive())){
+                throw new RuntimeException("User is not verified");
+            }
+            if(request.getOldPassword() == request.getNewPassword()){
+                throw new RuntimeException("New password can not be same with old password");
+            }
+            if(request.getNewPassword() != request.getConfirmNewPassword()){
+                throw new RuntimeException("New passwords do not match");
+            }
+            user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user);
         }
     }
 
@@ -299,6 +308,41 @@ public class UserServiceImpl implements UserService {
 
         return blockMapper.toBlock(user);
     }
+
+    @Override
+    public SalesResponseDTO getSalesHistory() {
+
+        Users currentUser = getCurrentUser();
+
+        List<Transactions> salesList =
+                transactionRepository.findTransactionBySellerId(currentUser.getId())
+                        .orElseThrow(() -> new RuntimeException("You did not sold any item!"));
+
+        List<TransactionDTO> transactionDTOs =
+                transactionMapper.toDtoList(salesList);
+
+        return SalesResponseDTO.builder()
+                .transactions(transactionDTOs)
+                .build();
+    }
+
+    @Override
+    public PurchaseResponseDTO getPurchaseHistory() {
+
+        Users currentUser = getCurrentUser();
+
+        List<Transactions> purchaseList =
+                transactionRepository.findTransactionByBuyerId(currentUser.getId())
+                        .orElseThrow(() -> new RuntimeException("You did not purchase any item!"));
+
+        List<TransactionDTO> transactionDTOs =
+                transactionMapper.toDtoList(purchaseList);
+
+        return PurchaseResponseDTO.builder()
+                .transactions(transactionDTOs)
+                .build();
+    }
+
 
 
     ////hilal filter testi silebilirsiniz

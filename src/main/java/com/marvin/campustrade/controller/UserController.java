@@ -1,12 +1,11 @@
 package com.marvin.campustrade.controller;
 
 import com.marvin.campustrade.data.dto.auth.UserResponse;
-import com.marvin.campustrade.data.dto.user.BlockResponse;
-import com.marvin.campustrade.data.dto.user.EditProfileRequest;
-import com.marvin.campustrade.data.dto.user.ProfileResponse;
+import com.marvin.campustrade.data.dto.user.*;
 import com.marvin.campustrade.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +49,15 @@ public class UserController {
         return ResponseEntity.ok(userService.unblockUser(userId));
     }
 
+    @GetMapping("/sales")
+    public ResponseEntity<SalesResponseDTO> getSalesHistory(){
+        return ResponseEntity.ok(userService.getSalesHistory());
+    }
+
+    @GetMapping("/purchases")
+    public ResponseEntity<PurchaseResponseDTO> getPurchaseHistory(){
+        return ResponseEntity.ok(userService.getPurchaseHistory());
+    }
 
     //hilal filter test için silebilirsiniz
     @GetMapping("/get-active-user/{email}")
