@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.logging.LogManager;
 
@@ -191,10 +192,10 @@ public class UserServiceImpl implements UserService {
             if(!(user.getIsVerified() && user.getIsActive())){
                 throw new RuntimeException("User is not verified");
             }
-            if(request.getOldPassword() == request.getNewPassword()){
+            if(Objects.equals(request.getOldPassword(), request.getNewPassword())){
                 throw new RuntimeException("New password can not be same with old password");
             }
-            if(request.getNewPassword() != request.getConfirmNewPassword()){
+            if(!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword())){
                 throw new RuntimeException("New passwords do not match");
             }
             user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
