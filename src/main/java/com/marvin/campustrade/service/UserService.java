@@ -19,6 +19,7 @@ public interface UserService {
     BlockResponse unblockUser(String id);
     SalesResponseDTO getSalesHistory();
     PurchaseResponseDTO getPurchaseHistory();
+    void resendVerificationEmail(String email);
 
     //hilal filter testi silebilirsiniz
     UserResponse findActiveUserByEamil(String email);

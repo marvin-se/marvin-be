@@ -26,8 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
-import java.util.logging.LogManager;
 
 @Service
 @RequiredArgsConstructor
@@ -45,19 +45,37 @@ public class UserServiceImpl implements UserService {
     private final TransactionMapper  transactionMapper;
 
     @Override
-    public UserResponse createUser(RegisterRequest request){
-        // Check if the email is already in use
-        if(userRepository.findByEmail(request.getEmail()).isPresent()){
-            throw new EmailAlreadyExistsException("Email is already registered");
+    @IncludeInactiveUsers
+    @Transactional
+    public UserResponse createUser(RegisterRequest request) {
+
+        Optional<Users> existingUserOpt = userRepository.findByEmail(request.getEmail());
+
+        Users user;
+
+        if (existingUserOpt.isPresent()) {
+            user = existingUserOpt.get();
+
+            if (Boolean.TRUE.equals(user.getIsActive())) {
+                throw new EmailAlreadyExistsException("Email already exists");
+            }
+            user.setIsActive(true);
+            user.setIsVerified(false);
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        } else {
+            user = userMapper.toEntity(request);
+            user.setIsActive(true);
+            user.setIsVerified(false);
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         }
-        // TO DO: Do we have all possible universities in the database?
+
         // Load university
         University university = universityRepository.findByName(request.getUniversity())
                 .orElseThrow(() -> new UniversityNotFoundException("University not found"));
 
-        // Validate student email domain
+        // Validate email domain
         String email = request.getEmail();
-        String requiredDomain = university.getDomain();   // e.g. "itu.edu.tr"
+        String requiredDomain = university.getDomain();
 
         if (!email.toLowerCase().endsWith("@" + requiredDomain.toLowerCase())) {
             throw new InvalidStudentEmailDomainException(
@@ -65,12 +83,10 @@ public class UserServiceImpl implements UserService {
             );
         }
 
-        Users user = userMapper.toEntity(request);
         user.setUniversity(university);
-        user.setIsVerified(false);
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+
         userRepository.save(user);
-        // create token
+
         String code = String.format("%06d", new Random().nextInt(999999));
         Token token = new Token();
         token.setContent(code);
@@ -79,11 +95,11 @@ public class UserServiceImpl implements UserService {
         token.setUser(user);
         tokenRepository.save(token);
 
-        // send email
         emailService.sendVerificationEmail(user.getEmail(), token);
 
         return userMapper.toResponse(user);
     }
+
 
     @Override
     public Users getCurrentUser(){
@@ -154,6 +170,31 @@ public class UserServiceImpl implements UserService {
         userToken.setIsVerified(true);
         tokenRepository.save(userToken);
 
+    }
+
+    @Override
+    public void resendVerificationEmail(String email){
+        Users user  = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        Optional<Token> token = tokenRepository.findByUserAndType(user, TokenType.EMAIL_VERIFICATION);
+        if(token.isPresent()){
+            String code = String.format("%06d", new Random().nextInt(999999));
+            token.get().setContent(code);
+            token.get().setExpiresAt(LocalDateTime.now().plusMinutes(15));
+            tokenRepository.save(token.get());
+            emailService.sendVerificationEmail(user.getEmail(), token.get());
+        }
+        else{
+            String code = String.format("%06d", new Random().nextInt(999999));
+            Token newToken = new Token();
+            newToken.setContent(code);
+            newToken.setType(TokenType.EMAIL_VERIFICATION);
+            newToken.setExpiresAt(LocalDateTime.now().plusMinutes(15));
+            newToken.setUser(user);
+            tokenRepository.save(newToken);
+            emailService.sendVerificationEmail(user.getEmail(), newToken);
+        }
     }
 
     @Override
