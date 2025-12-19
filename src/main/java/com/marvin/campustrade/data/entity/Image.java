@@ -19,6 +19,7 @@ public class Image {
     @Column(updatable = false, nullable = false)
     private Long id;
 
+    //burada image_url demiştik ama s3 keysini  tutacağız
     @Column(name = "image_url", nullable = false, length = 500)
     private String imageUrl;
 
