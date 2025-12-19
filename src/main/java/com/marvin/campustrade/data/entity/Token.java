@@ -47,9 +47,9 @@ public class Token {
     @Column(name = "is_verified", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isVerified = false;
 
-    @Column(nullable = false)
-    private boolean expired = false;
+    @Column(name = "is_expired")
+    private boolean isExpired = false;
 
-    @Column(nullable = false)
-    private boolean revoked = false;
+    @Column(name = "is_revoked")
+    private boolean isRevoked = false;
 }
