@@ -16,7 +16,7 @@ import java.util.List;
 public class FavouriteController {
     private final FavouriteService favouriteService;
 
-    @PostMapping("/{add}")
+    @PostMapping("/add")
     public ResponseEntity<FavouriteDTO> addFavourite(
             @RequestBody AddFavouriteRequest request) {
 
@@ -32,7 +32,7 @@ public class FavouriteController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{getAll}")
+    @GetMapping("/getAll")
     public ResponseEntity<List<FavouriteDTO>> getUserFavourites() {
         return ResponseEntity.ok(favouriteService.getUserFavourites());
     }
