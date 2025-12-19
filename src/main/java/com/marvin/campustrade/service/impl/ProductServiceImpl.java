@@ -6,10 +6,12 @@ import com.marvin.campustrade.data.entity.Image;
 import com.marvin.campustrade.data.entity.Product;
 import com.marvin.campustrade.data.entity.Users;
 import com.marvin.campustrade.data.mapper.ProductMapper;
+import com.marvin.campustrade.data.mapper.UserMapper;
 import com.marvin.campustrade.exception.InvalidRequestFieldException;
 import com.marvin.campustrade.exception.ProductNotFoundException;
 import com.marvin.campustrade.exception.UnauthorizedActionException;
 import com.marvin.campustrade.exception.UserNotFoundException;
+import com.marvin.campustrade.repository.FavouriteRepository;
 import com.marvin.campustrade.repository.ImageRepository;
 import com.marvin.campustrade.repository.ProductRepository;
 import com.marvin.campustrade.repository.UserRepository;
@@ -19,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,7 @@ public class ProductServiceImpl implements ProductService {
     private final ImageRepository imageRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final FavouriteRepository favouriteRepository;
 
     @Override
     public ProductDTO.Response createProduct(ProductDTO.CreateRequest request) {
@@ -61,9 +65,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO.Response> getAllProducts() {
-        return productRepository.findAll()
-                .stream()
-                .map(productMapper::toResponse)
+        List<Product> products = productRepository.findAll();
+
+        return products.stream()
+                .map(product -> {
+                    ProductDTO.Response response =
+                            productMapper.toResponse(product);
+
+                    // ✅ set isFavourite in one central place
+                    applyFavouriteFlag(product, response);
+
+                    return response;
+                })
                 .toList();
     }
 
@@ -71,17 +84,26 @@ public class ProductServiceImpl implements ProductService {
     public ProductDTO.Response getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
-        ProductDTO.Response response = productMapper.toResponse(product);
 
-        // check owner safely
+        ProductDTO.Response response = productMapper.toResponse(product);
+        applyFavouriteFlag(product, response);
+
         try {
             Users currentUser = userService.getCurrentUser();
 
-            if (product.getUser().getId().equals(currentUser.getId())) {
+            // increment views ONLY if viewer is NOT the owner
+            if (!product.getUser().getId().equals(currentUser.getId())) {
+                product.setVisitCount(product.getVisitCount() + 1);
+                productRepository.save(product);
+            } else {
+                // owner sees metrics
                 productMapper.includeOwnerMetrics(product, response);
             }
+
         } catch (Exception ignored) {
-            // user not authenticated → public view only
+            // unauthenticated user → still counts as a view
+            product.setVisitCount(product.getVisitCount() + 1);
+            productRepository.save(product);
         }
         return response;
     }
@@ -151,6 +173,8 @@ public class ProductServiceImpl implements ProductService {
                     ProductDTO.Response response =
                             productMapper.toResponse(product);
 
+                    applyFavouriteFlag(product, response);
+
                     if (isOwner) {
                         productMapper.includeOwnerMetrics(product, response);
                     }
@@ -159,4 +183,18 @@ public class ProductServiceImpl implements ProductService {
                 .toList();
     }
 
+    private void applyFavouriteFlag(Product product, ProductDTO.Response response) {
+        try {
+            Users currentUser = userService.getCurrentUser();
+
+            boolean isFavourite = favouriteRepository
+                    .existsByUserIdAndProductId(currentUser.getId(), product.getId());
+
+            response.setIsFavourite(isFavourite);
+
+        } catch (Exception e) {
+            // not authenticated
+            response.setIsFavourite(false);
+        }
+    }
 }

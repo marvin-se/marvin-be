@@ -1,6 +1,7 @@
 package com.marvin.campustrade.data.dto;
 
 import com.marvin.campustrade.constants.Category;
+import com.marvin.campustrade.constants.Status;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -59,15 +60,18 @@ public class ProductDTO {
     public static class Response {
         private Long id;
         private String title;
+        private Long sellerId;
         private String description;
         private BigDecimal price;
         private Category category;
         private String universityName;
         private List<String> images;
+        private Boolean isFavourite;
+        private Status status;
 
         // OWNER ONLY
-        private Integer favoriteCount;
-        private Integer visitCount;
+        private Long favouriteCount;
+        private Long visitCount;
     }
 
 }
