@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 public class AddFavouriteRequest {
 
-    private Long userId;
     private Long productId;
+
 }

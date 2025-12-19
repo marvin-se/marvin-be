@@ -1,8 +1,12 @@
 package com.marvin.campustrade.data.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+
 import lombok.Setter;
 
 @Entity
@@ -15,7 +19,10 @@ import lombok.Setter;
         })
 @Setter
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // 🔥 JPA için ZORUNLU
+
+@AllArgsConstructor
+@Builder
 public class Favourite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
