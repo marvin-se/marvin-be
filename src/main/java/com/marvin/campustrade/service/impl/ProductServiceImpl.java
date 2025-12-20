@@ -188,7 +188,7 @@ public class ProductServiceImpl implements ProductService {
             Users currentUser = userService.getCurrentUser();
 
             boolean isFavourite = favouriteRepository
-                    .existsByUserIdAndProductId(currentUser.getId(), product.getId());
+                    .existsByUserAndProduct(currentUser, product);
 
             response.setIsFavourite(isFavourite);
 

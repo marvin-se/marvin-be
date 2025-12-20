@@ -24,13 +24,13 @@ public class FavouriteController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(favouriteService.addFavourite(request));
+                .body(favouriteFacadeService.addFavourite(request));
     }
 
 
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> removeFromFavourites(@PathVariable Long productId) {
-        favouriteService.removeFromFavourites(productId);
+        favouriteFacadeService.removeFromFavourites(productId);
         return ResponseEntity.noContent().build();
     }
 

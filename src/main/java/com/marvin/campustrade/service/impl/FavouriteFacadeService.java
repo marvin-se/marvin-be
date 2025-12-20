@@ -1,5 +1,6 @@
 package com.marvin.campustrade.service.impl;
 
+import com.marvin.campustrade.data.dto.AddFavouriteRequest;
 import com.marvin.campustrade.data.dto.FavouriteDTO;
 import com.marvin.campustrade.repository.ProductRepository;
 import com.marvin.campustrade.service.FavouriteService;
@@ -14,15 +15,15 @@ public class FavouriteFacadeService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public FavouriteDTO addToFavourites(Long userId, Long productId) {
-        FavouriteDTO dto = favouriteService.addToFavourites(userId, productId);
-        productRepository.incrementFavouriteCount(productId);
+    public FavouriteDTO addFavourite(AddFavouriteRequest request) {
+        FavouriteDTO dto = favouriteService.addFavourite(request);
+        productRepository.incrementFavouriteCount(request.getProductId());
         return dto;
     }
 
     @Transactional
-    public void removeFromFavourites(Long userId, Long productId) {
-        favouriteService.removeFromFavourites(userId, productId);
+    public void removeFromFavourites(Long productId) {
+        favouriteService.removeFromFavourites(productId);
         productRepository.decrementFavouriteCount(productId);
     }
 }
