@@ -29,8 +29,8 @@ public class AuthController {
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<String> resendVerificationEmail(@Valid @RequestParam String email) {
-        userService.resendVerificationEmail(email);
+    public ResponseEntity<String> resendVerificationEmail(@Valid @RequestBody ResendVerificationCodeDTO request) {
+        userService.resendVerificationEmail(request);
         return ResponseEntity.ok("Your verification token has been resend!");
     }
 
