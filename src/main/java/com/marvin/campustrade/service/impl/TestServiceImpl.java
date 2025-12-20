@@ -14,7 +14,7 @@ public class TestServiceImpl implements TestService {
     public TestServiceImpl(@Value("${aws.s3.bucket:default-bucket}") String bucketName,
                            S3Presigner presigner) {
         this.bucketName = bucketName;
-        this.presigner = S3Presigner.create();
+        this.presigner = presigner;
     }
 
 }

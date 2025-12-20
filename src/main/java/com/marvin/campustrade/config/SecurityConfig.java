@@ -34,7 +34,7 @@ public class SecurityConfig {
                     s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/auth/**", "/h2-console/**", "/error").permitAll()
+                    .requestMatchers("/auth/**", "/universities/**", "/h2-console/**", "/error").permitAll()
                     .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions(frame -> frame.disable()));

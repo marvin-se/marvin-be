@@ -173,8 +173,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resendVerificationEmail(String email){
-        Users user  = userRepository.findByEmail(email)
+    public void resendVerificationEmail(ResendVerificationCodeDTO request){
+        Users user  = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         Optional<Token> token = tokenRepository.findByUserAndType(user, TokenType.EMAIL_VERIFICATION);
