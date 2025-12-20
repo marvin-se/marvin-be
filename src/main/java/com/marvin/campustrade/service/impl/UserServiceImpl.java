@@ -139,15 +139,25 @@ public class UserServiceImpl implements UserService {
     public void generateResetEmail(ForgotPasswordRequest request) {
         Users user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        String code = String.format("%06d", new Random().nextInt(999999));
-        Token token = new Token();
+
+        String code = String.format("%06d", new Random().nextInt(1_000_000));
+
+        Token token = tokenRepository
+                .findByUserAndType(user, TokenType.PASSWORD_RESET)
+                .orElseGet(() -> {
+                    Token t = new Token();
+                    t.setUser(user);
+                    t.setType(TokenType.PASSWORD_RESET);
+                    return t;
+                });
+
         token.setContent(code);
-        token.setType(TokenType.PASSWORD_RESET);
         token.setExpiresAt(LocalDateTime.now().plusMinutes(15));
-        token.setUser(user);
+
         tokenRepository.save(token);
         emailService.sendResetEmail(user.getEmail(), token);
     }
+
     @Override
     public void verifyResetCode(VerifyRequest request){
         Users user = userRepository.findByEmail(request.getEmail())
