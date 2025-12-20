@@ -4,6 +4,7 @@ package com.marvin.campustrade.controller;
 import com.marvin.campustrade.data.dto.AddFavouriteRequest;
 import com.marvin.campustrade.data.dto.FavouriteDTO;
 import com.marvin.campustrade.service.FavouriteService;
+import com.marvin.campustrade.service.impl.FavouriteFacadeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FavouriteController {
     private final FavouriteService favouriteService;
+    private final FavouriteFacadeService favouriteFacadeService;
 
     @PostMapping("/add")
     public ResponseEntity<FavouriteDTO> addFavourite(
@@ -22,13 +24,13 @@ public class FavouriteController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(favouriteService.addFavourite(request));
+                .body(favouriteFacadeService.addFavourite(request));
     }
 
 
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> removeFromFavourites(@PathVariable Long productId) {
-        favouriteService.removeFromFavourites(productId);
+        favouriteFacadeService.removeFromFavourites(productId);
         return ResponseEntity.noContent().build();
     }
 
@@ -36,5 +38,4 @@ public class FavouriteController {
     public ResponseEntity<List<FavouriteDTO>> getUserFavourites() {
         return ResponseEntity.ok(favouriteService.getUserFavourites());
     }
-
 }

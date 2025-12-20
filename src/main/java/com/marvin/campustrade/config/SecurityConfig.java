@@ -9,7 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -37,8 +39,9 @@ public class SecurityConfig {
                     .requestMatchers("/auth/**", "/h2-console/**", "/error").permitAll()
                     .anyRequest().authenticated()
             )
-            .headers(headers -> headers.frameOptions(frame -> frame.disable()));
-            http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+            .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+            .logout(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

@@ -3,6 +3,7 @@ package com.marvin.campustrade.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.util.Date;
 public class JwtUtils {
     @Value("${jwt.secret}")
     private String jwtSecret;
+    @Getter
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;
 

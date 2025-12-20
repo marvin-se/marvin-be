@@ -43,7 +43,7 @@ public class Product {
     private Status status;
 
     @Column(name = "fav_count", nullable = false)
-    private Long favoriteCount = 0L;
+    private Long favouriteCount = 0L;
 
     @Column(name = "visit_count", nullable = false)
     private Long visitCount = 0L;

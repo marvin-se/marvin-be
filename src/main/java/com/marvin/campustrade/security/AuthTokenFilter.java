@@ -1,10 +1,12 @@
 package com.marvin.campustrade.security;
 
+import com.marvin.campustrade.repository.TokenRepository;
 import com.marvin.campustrade.service.impl.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,12 +20,13 @@ import java.io.IOException;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class AuthTokenFilter extends OncePerRequestFilter {
     public static final String BEARER_ = "Bearer ";
-    @Autowired
-    private JwtUtils jwtUtils;
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
+
+    private final JwtUtils jwtUtils;
+    private final CustomUserDetailsService userDetailsService;
+    private final TokenRepository tokenRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -32,19 +35,39 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateToken(jwt)) {
-                final String email = jwtUtils.getUserFromToken(jwt);
-                final UserDetails userDetails =
+
+            if (jwt == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            if (!jwtUtils.validateToken(jwt)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            String email = jwtUtils.getUserFromToken(jwt);
+            if(email != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null )
+            {
+                UserDetails userDetails =
                         userDetailsService.loadUserByUsername(email);
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities());
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource()
-                        .buildDetails(request));
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authenticationToken);
+
+                boolean isTokenValid = tokenRepository.findByContent(jwt)
+                        .map(t -> !t.isExpired() && !t.isRevoked())
+                        .orElse(false);
+                if(isTokenValid) {
+                    UsernamePasswordAuthenticationToken authenticationToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource()
+                            .buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authenticationToken);
+                }
             }
         } catch (Exception e) {
             log.error("Cannot set user authentication: {}",e);
