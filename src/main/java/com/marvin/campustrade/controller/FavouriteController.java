@@ -18,30 +18,24 @@ public class FavouriteController {
     private final FavouriteService favouriteService;
     private final FavouriteFacadeService favouriteFacadeService;
 
-    @PostMapping("/{userId}")
-    public ResponseEntity<FavouriteDTO> addToFavourites(
-            @PathVariable Long userId,
-            @RequestBody AddFavouriteRequest request
-    ){
-        FavouriteDTO dto =
-                favouriteFacadeService.addToFavourites(userId, request.getProductId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+    @PostMapping("/add")
+    public ResponseEntity<FavouriteDTO> addFavourite(
+            @RequestBody AddFavouriteRequest request) {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(favouriteService.addFavourite(request));
     }
 
-    @DeleteMapping("/{userId}/{productId}")
-    public ResponseEntity<Void> removeFromFavourites(
-            @PathVariable Long userId,
-            @PathVariable Long productId
-    ){
-        favouriteFacadeService.removeFromFavourites(userId, productId);
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> removeFromFavourites(@PathVariable Long productId) {
+        favouriteService.removeFromFavourites(productId);
         return ResponseEntity.noContent().build();
     }
 
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<FavouriteDTO>> getUserFavourites(
-            @PathVariable Long userId
-    ){
-        return ResponseEntity.ok(favouriteService.getUserFavourites(userId));
+    @GetMapping("/getAll")
+    public ResponseEntity<List<FavouriteDTO>> getUserFavourites() {
+        return ResponseEntity.ok(favouriteService.getUserFavourites());
     }
 }

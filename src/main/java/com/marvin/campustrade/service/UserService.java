@@ -1,9 +1,7 @@
 package com.marvin.campustrade.service;
 
 import com.marvin.campustrade.data.dto.auth.*;
-import com.marvin.campustrade.data.dto.user.BlockResponse;
-import com.marvin.campustrade.data.dto.user.EditProfileRequest;
-import com.marvin.campustrade.data.dto.user.ProfileResponse;
+import com.marvin.campustrade.data.dto.user.*;
 import com.marvin.campustrade.data.entity.Users;
 
 public interface UserService {
@@ -19,6 +17,9 @@ public interface UserService {
     ProfileResponse getUser(String id);
     BlockResponse blockUser(String id);
     BlockResponse unblockUser(String id);
+    SalesResponseDTO getSalesHistory();
+    PurchaseResponseDTO getPurchaseHistory();
+    void resendVerificationEmail(String email);
 
     //hilal filter testi silebilirsiniz
     UserResponse findActiveUserByEamil(String email);

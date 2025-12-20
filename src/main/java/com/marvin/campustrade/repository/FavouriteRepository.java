@@ -2,15 +2,17 @@ package com.marvin.campustrade.repository;
 
 import com.marvin.campustrade.data.entity.Favourite;
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.marvin.campustrade.data.entity.Users;
+import com.marvin.campustrade.data.entity.Product;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface FavouriteRepository extends JpaRepository<Favourite,Long>{
+public interface FavouriteRepository extends JpaRepository<Favourite,Long> {
 
-    boolean existsByUserIdAndProductId(Long userId, Long productId);
+    boolean existsByUserAndProduct(Users user, Product product);
 
-    Optional<Favourite> findByUserIdAndProductId(Long userId, Long productId);
+    List<Favourite> findAllByUser(Users user);
 
-    List<Favourite> findAllByUserId(Long userId);
+    Optional<Favourite> findByUserAndProductId(Users user, Long productId);
 }
