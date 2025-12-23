@@ -130,17 +130,24 @@ public class MessageServiceImpl implements MessageService {
     @Transactional
     public SendMessageResponseDTO sendMessage(SendMessageRequestDTO request) {
 
-        Users sender = userService.getCurrentUser();
-
+       // Users sender = userService.getCurrentUser();
+        Users sender = userRepository.findById(2L).orElseThrow();
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        Users receiver = product.getUser();
-
         Conversation conversation =
                 conversationRepository
-                        .findByUsersAndProduct(sender.getId(), receiver.getId(), product.getId())
-                        .orElseGet(() -> createConversation(sender, receiver, product));
+                        .findByUsersAndProduct(
+                                sender.getId(),
+                                product.getUser().getId(),
+                                product.getId()
+                        )
+                        .orElseGet(() ->
+                                createConversation(sender, product.getUser(), product)
+                        );
+
+        Users receiver = conversation.getUser1().getId().equals(sender.getId())? conversation.getUser2(): conversation.getUser1();
+
 
         Message message = new Message();
         message.setConversation(conversation);
@@ -148,6 +155,7 @@ public class MessageServiceImpl implements MessageService {
         message.setReceiver(receiver);
         message.setContent(request.getContent());
         message.setSentAt(LocalDateTime.now());
+        message.setRead(false);
 
         Message saved = messageRepository.save(message);
 
@@ -156,8 +164,11 @@ public class MessageServiceImpl implements MessageService {
                 .messageId(saved.getId())
                 .conversationId(conversation.getId())
                 .sentAt(saved.getSentAt())
+                .content(saved.getContent())
+                .receiverId(receiver.getId())
                 .build();
     }
+
 
     private Conversation createConversation(Users sender, Users receiver, Product product) {
         Conversation conversation = new Conversation();
