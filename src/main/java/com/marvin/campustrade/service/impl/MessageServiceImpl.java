@@ -23,7 +23,7 @@ import com.marvin.campustrade.data.dto.message.SendMessageRequestDTO;
 import com.marvin.campustrade.data.dto.message.SendMessageResponseDTO;
 
 
-
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -128,10 +128,14 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public SendMessageResponseDTO sendMessage(SendMessageRequestDTO request) {
+    public SendMessageResponseDTO sendMessage(SendMessageRequestDTO request, Principal principal) {
 
-       // Users sender = userService.getCurrentUser();
-        Users sender = userRepository.findById(2L).orElseThrow();
+        String email = principal.getName();
+
+        Users sender = userRepository
+                .findByEmail(email)
+                .orElseThrow();
+        //Users sender = userRepository.findById(2L).orElseThrow();
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 

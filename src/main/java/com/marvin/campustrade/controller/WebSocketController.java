@@ -6,7 +6,10 @@ import com.marvin.campustrade.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+
+import java.security.Principal;
 
 @Controller
 @RequiredArgsConstructor
@@ -17,8 +20,9 @@ public class WebSocketController {
 
 
     @MessageMapping("/chat.send")
-    public void sendMessage(SendMessageRequestDTO request) {
-        SendMessageResponseDTO response = messageService.sendMessage(request);
+    @PreAuthorize("isAuthenticated()")
+    public void sendMessage(SendMessageRequestDTO request, Principal principal) {
+        SendMessageResponseDTO response = messageService.sendMessage(request, principal);
 
         messagingTemplate.convertAndSend(
                 "/topic/conversations/" + response.getConversationId(),
