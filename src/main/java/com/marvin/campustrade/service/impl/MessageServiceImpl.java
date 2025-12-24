@@ -1,27 +1,20 @@
 package com.marvin.campustrade.service.impl;
 
 import com.marvin.campustrade.common.IncludeInactiveUsers;
-import com.marvin.campustrade.data.dto.message.ConversationDTO;
-import com.marvin.campustrade.data.dto.message.ConversationList;
-import com.marvin.campustrade.data.dto.message.LastMessageDTO;
+import com.marvin.campustrade.data.dto.message.*;
 import com.marvin.campustrade.data.entity.Conversation;
 import com.marvin.campustrade.data.entity.Message;
 import com.marvin.campustrade.data.entity.Product;
 import com.marvin.campustrade.data.entity.Users;
 import com.marvin.campustrade.data.mapper.ConversationMapper;
-import com.marvin.campustrade.data.mapper.UserMapper;
-import com.marvin.campustrade.repository.ConversationRepository;
-import com.marvin.campustrade.repository.MessageRepository;
-import com.marvin.campustrade.repository.ProductRepository;
-import com.marvin.campustrade.repository.UserRepository;
+import com.marvin.campustrade.repository.*;
 import com.marvin.campustrade.service.MessageService;
 import com.marvin.campustrade.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.marvin.campustrade.data.dto.message.SendMessageRequestDTO;
-import com.marvin.campustrade.data.dto.message.SendMessageResponseDTO;
-
+import com.marvin.campustrade.data.mapper.MessageMapper;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -39,6 +32,8 @@ public class MessageServiceImpl implements MessageService {
     private final ConversationMapper conversationMapper;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final MessageMapper messageMapper;
+
 
     @Transactional
     @Override
@@ -173,7 +168,6 @@ public class MessageServiceImpl implements MessageService {
                 .build();
     }
 
-
     private Conversation createConversation(Users sender, Users receiver, Product product) {
         Conversation conversation = new Conversation();
         conversation.setUser1(sender);
@@ -183,6 +177,92 @@ public class MessageServiceImpl implements MessageService {
         return conversationRepository.save(conversation);
     }
 
+    @Override
+    @Transactional
+    public ConversationDTO getConversation(Long otherUserId, Long productId) {
 
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
 
+        Users currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Sender user not found"));
+
+        Users otherUser = userRepository.findById(otherUserId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        Conversation conversation =
+                conversationRepository
+                        .findByUsersAndProduct(
+                                currentUser.getId(),
+                                otherUser.getId(),
+                                productId
+                        )
+                        .orElseGet(() -> createConversation(
+                                currentUser,
+                                otherUser,
+                                product
+                        ));
+
+        List<Message> messages =
+                messageRepository.findByConversationOrderBySentAtAsc(conversation);
+
+        ConversationDTO dto =
+                conversationMapper.toConversationDTO(
+                        conversation,
+                        currentUser.getId()
+                );
+
+        List<MessageDTO> messageDTOs =
+                messages.stream()
+                        .map(messageMapper::toDTO)
+                        .toList();
+
+        dto.setMessages(messageDTOs);
+
+        return dto;
+    }
+
+    @Override
+    @Transactional
+    public void deleteConversation(Long otherUserId, Long productId) {
+
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        Users currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Users otherUser = userRepository.findById(otherUserId)
+                .orElseThrow(() -> new RuntimeException("Other user not found"));
+
+        Conversation conversation =
+                conversationRepository
+                        .findByUsersAndProduct(
+                                currentUser.getId(),
+                                otherUser.getId(),
+                                productId
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException("Conversation not found")
+                        );
+
+        boolean isParticipant =
+                conversation.getUser1().getId().equals(currentUser.getId())
+                        || conversation.getUser2().getId().equals(currentUser.getId());
+
+        if (!isParticipant) {
+            throw new RuntimeException("You are not allowed to delete this conversation");
+        }
+
+        messageRepository.deleteByConversation(conversation);
+
+        conversationRepository.delete(conversation);
+    }
 }

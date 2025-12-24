@@ -14,20 +14,29 @@ import java.util.Optional;
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
 
     List<Conversation> findByUser1_IdOrUser2_Id(Long user1Id, Long user2Id);
-
+    Optional<Conversation> findByUser1_IdAndUser2_IdOrUser2_IdAndUser1_Id(Long user1Id, Long user2Id, Long user1IdOther, Long user2IdOther);
 
     @Query("""
         SELECT c FROM Conversation c
-        WHERE c.product.id = :productId
-        AND (
-       
-        (c.user1.id = :user1Id AND c.user2.id = :user2Id)
-        OR (c.user1.id = :user2Id AND c.user2.id = :user1Id)
-        )
-        """)
+        WHERE (c.user1 = :u1 AND c.user2 = :u2)
+           OR (c.user1 = :u2 AND c.user2 = :u1)
+    """)
+    Optional<Conversation> findConversationBetween(
+            @Param("u1") Users user1,
+            @Param("u2") Users user2
+    );
+
+    @Query("""
+SELECT c FROM Conversation c
+WHERE c.product.id = :productId
+AND (
+     (c.user1.id = :userA AND c.user2.id = :userB)
+  OR (c.user1.id = :userB AND c.user2.id = :userA)
+)
+""")
     Optional<Conversation> findByUsersAndProduct(
-            @Param("user1Id") Long user1Id,
-            @Param("user2Id") Long user2Id,
+            @Param("userA") Long userA,
+            @Param("userB") Long userB,
             @Param("productId") Long productId
     );
 

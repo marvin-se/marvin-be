@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
     Optional<Message> findTopByConversationIdOrderBySentAtDesc(Long conversationId);
-
+    List<Message> findByConversationOrderBySentAtAsc(Conversation conversation);
     @Query("""
         SELECT m
         FROM Message m
@@ -25,6 +25,9 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
         )
         """)
     List<Message> findLastMessagesForConversations(@Param("conversationIds") List<Long> ids);
+
+    void deleteByConversation(Conversation conversation);
+
 
 }
 
