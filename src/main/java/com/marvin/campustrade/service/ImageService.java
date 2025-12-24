@@ -13,9 +13,6 @@ public interface ImageService {
     // when a product is deleted,
     // all images of it need to be deleted
     void deleteImagesByProduct(Product product);
-
-    List<String> getImageKeysByProductId(Long productId);
     void deleteImage(Long productId, String imageKey);
-
     ImageDTO.ImageListResponse getImagesWithPresignedUrls(Long productId);
 }

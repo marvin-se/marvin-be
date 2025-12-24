@@ -78,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
                                 Collectors.mapping(Image::getImageUrl, Collectors.toList())
                         ));
 
-        Set<Long> favouriteProductIdsTemp = Set.of();
+        Set<Long> favouriteProductIdsTemp;
         try {
             Users currentUser = userService.getCurrentUser();
             favouriteProductIdsTemp =
@@ -216,21 +216,6 @@ public class ProductServiceImpl implements ProductService {
                                 favouriteIds
                         )
                 ).toList();
-    }
-
-    private void applyFavouriteFlag(Product product, ProductDTO.Response response) {
-        try {
-            Users currentUser = userService.getCurrentUser();
-
-            boolean isFavourite = favouriteRepository
-                    .existsByUserAndProduct(currentUser, product);
-
-            response.setIsFavourite(isFavourite);
-
-        } catch (Exception e) {
-            // not authenticated
-            response.setIsFavourite(false);
-        }
     }
 
     @Override
