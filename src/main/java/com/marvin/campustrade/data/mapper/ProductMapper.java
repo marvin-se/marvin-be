@@ -18,6 +18,10 @@ public interface ProductMapper {
     @Mapping(target = "sellerId", source = "user.id")
     @Mapping(target = "universityName", source = "user.university.name")
     @Mapping(target = "images", ignore = true)
+
+    // owner-only fields are NOT mapped by default
+    @Mapping(target = "favouriteCount", ignore = true)
+    @Mapping(target = "visitCount", ignore = true)
     ProductDTO.Response toResponse(Product product);
 
     // ---------- UPDATE ----------
@@ -26,4 +30,13 @@ public interface ProductMapper {
             ProductDTO.UpdateRequest request,
             @MappingTarget Product product
     );
+
+    // ---------- OWNER-ONLY METRICS ----------
+    default void includeOwnerMetrics(
+            Product product,
+            @MappingTarget ProductDTO.Response response
+    ) {
+        response.setVisitCount(product.getVisitCount());
+        response.setFavouriteCount(product.getFavouriteCount());
+    }
 }
