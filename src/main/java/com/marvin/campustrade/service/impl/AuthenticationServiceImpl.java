@@ -39,7 +39,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new UsernameNotFoundException("User not found");
         }
         if (!user.getIsVerified()) {
-            throw new RuntimeException("Please verify your email");
+            throw new AuthenticationLoginException("User email is not verified");
         }
         // Revoke all previous valid tokens
         var validTokens = tokenRepository.findAllValidTokenByUser(user.getId());

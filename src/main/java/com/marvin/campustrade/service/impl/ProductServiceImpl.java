@@ -6,7 +6,6 @@ import com.marvin.campustrade.data.entity.Image;
 import com.marvin.campustrade.data.entity.Product;
 import com.marvin.campustrade.data.entity.Users;
 import com.marvin.campustrade.data.mapper.ProductMapper;
-import com.marvin.campustrade.data.mapper.UserMapper;
 import com.marvin.campustrade.exception.InvalidRequestFieldException;
 import com.marvin.campustrade.exception.ProductNotFoundException;
 import com.marvin.campustrade.exception.UnauthorizedActionException;
@@ -15,68 +14,91 @@ import com.marvin.campustrade.repository.FavouriteRepository;
 import com.marvin.campustrade.repository.ImageRepository;
 import com.marvin.campustrade.repository.ProductRepository;
 import com.marvin.campustrade.repository.UserRepository;
+import com.marvin.campustrade.service.ImageService;
 import com.marvin.campustrade.service.ProductService;
 import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-    private final ProductRepository productRepository;
-    private final ProductMapper productMapper;
+    private final FavouriteRepository favouriteRepository;
     private final ImageRepository imageRepository;
+    private final ImageService imageService;
+    private final ProductMapper productMapper;
+    private final ProductRepository productRepository;
     private final UserService userService;
     private final UserRepository userRepository;
-    private final FavouriteRepository favouriteRepository;
 
     @Override
     public ProductDTO.Response createProduct(ProductDTO.CreateRequest request) {
         Users user = userService.getCurrentUser();
         Product product = productMapper.toEntity(request);
         product.setUser(user);
-        product.setStatus(Status.AVAILABLE);
+        product.setStatus(Status.DRAFT);
 
         Product saved = productRepository.save(product);    // added new ad to db
 
-        // save images manually
-        if(request.getImages() != null) {
-           for(String url : request.getImages()) {
-               Image img = new Image();
-               img.setImageUrl(url);
-               img.setProduct(saved);
-               imageRepository.save(img);
-           }
-        }
-
-        List<Image> imgs = imageRepository.findByProduct(saved);
-        List<String> urls = imgs.stream()
-                .map(Image::getImageUrl)
-                .toList();
-
         ProductDTO.Response response = productMapper.toResponse(saved);
-        response.setImages(urls);
+        response.setImages(List.of());
 
         return response;
     }
 
+    @Transactional
+    @Override
+    public void publishProduct(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        long imageCount = imageRepository.countByProduct(product);
+        if(imageCount < 1) {
+            throw new IllegalStateException("Product must have at least one image");
+        }
+        product.setStatus(Status.AVAILABLE);
+    }
+
     @Override
     public List<ProductDTO.Response> getAllProducts() {
-        List<Product> products = productRepository.findAll();
+        List<Product> products = productRepository.findAllByStatus(Status.AVAILABLE);
+
+        List<Image> allImages = imageRepository.findAllByProductIn(products);
+
+        Map<Long, List<String>> imagesByProductId =
+                allImages.stream()
+                        .collect(Collectors.groupingBy(
+                                img -> img.getProduct().getId(),
+                                Collectors.mapping(Image::getImageUrl, Collectors.toList())
+                        ));
+
+        Set<Long> favouriteProductIdsTemp;
+        try {
+            Users currentUser = userService.getCurrentUser();
+            favouriteProductIdsTemp =
+                    favouriteRepository.findFavouriteProductIds(
+                            currentUser, products
+                    );
+        } catch (Exception ignored) {
+            favouriteProductIdsTemp = Set.of();
+        }
+
+        final Set<Long> favouriteProductIds = favouriteProductIdsTemp;
 
         return products.stream()
-                .map(product -> {
-                    ProductDTO.Response response =
-                            productMapper.toResponse(product);
-
-                    // ✅ set isFavourite in one central place
-                    applyFavouriteFlag(product, response);
-
-                    return response;
-                })
+                .map(product ->
+                        buildResponse(
+                                product,
+                                imagesByProductId.getOrDefault(product.getId(), List.of()),
+                                favouriteProductIds
+                        )
+                )
                 .toList();
     }
 
@@ -85,27 +107,27 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        ProductDTO.Response response = productMapper.toResponse(product);
-        applyFavouriteFlag(product, response);
+        List<String> images = imageRepository.findByProduct(product)
+                .stream()
+                .map(Image::getImageUrl).toList();
 
+        Set<Long> favouriteProductIds;
         try {
-            Users currentUser = userService.getCurrentUser();
+            Users user = userService.getCurrentUser();
+            favouriteProductIds = favouriteRepository
+                    .findFavouriteProductIds(user, List.of(product));
 
-            // increment views ONLY if viewer is NOT the owner
-            if (!product.getUser().getId().equals(currentUser.getId())) {
+            if(!product.getUser().getId().equals(user.getId())) {
                 product.setVisitCount(product.getVisitCount() + 1);
                 productRepository.save(product);
-            } else {
-                // owner sees metrics
-                productMapper.includeOwnerMetrics(product, response);
             }
-
-        } catch (Exception ignored) {
-            // unauthenticated user → still counts as a view
+        } catch (Exception e) {
+            favouriteProductIds = Set.of();
             product.setVisitCount(product.getVisitCount() + 1);
             productRepository.save(product);
         }
-        return response;
+
+        return buildResponse(product, images, favouriteProductIds);
     }
 
     @Override
@@ -116,6 +138,8 @@ public class ProductServiceImpl implements ProductService {
         if(!product.getUser().getId().equals(sellerId)) {
             throw new UnauthorizedActionException("You can only delete your own products");
         }
+
+        imageService.deleteImagesByProduct(product);
 
         productRepository.delete(product);
     }
@@ -138,8 +162,8 @@ public class ProductServiceImpl implements ProductService {
         }
 
         productMapper.updateEntityFromDto(request, product);
-
         Product updated = productRepository.save(product);
+
         return productMapper.toResponse(updated);
     }
 
@@ -165,36 +189,65 @@ public class ProductServiceImpl implements ProductService {
         if (!userRepository.existsById(sellerId)) {
             throw new UserNotFoundException("User not found");
         }
-        boolean isOwner = sellerId.equals(currentUserId);
 
-        return productRepository.findAllByUserId(sellerId)
-                .stream()
-                .map(product -> {
-                    ProductDTO.Response response =
-                            productMapper.toResponse(product);
+        List<Product> products = productRepository.findAllByUserId(sellerId);
 
-                    applyFavouriteFlag(product, response);
+        Map<Long, List<String>> imagesByProductId =
+                imageRepository.findAllByProductIn(products)
+                        .stream()
+                        .collect(Collectors.groupingBy(
+                                img -> img.getProduct().getId(),
+                                Collectors.mapping(Image::getImageUrl, Collectors.toList())
+                        ));
 
-                    if (isOwner) {
-                        productMapper.includeOwnerMetrics(product, response);
-                    }
-                    return response;
-                })
-                .toList();
+        Set<Long> favouriteProductIdsTemp;
+        try {
+            Users user = userService.getCurrentUser();
+            favouriteProductIdsTemp = favouriteRepository.findFavouriteProductIds(user, products);
+        } catch (Exception e) {
+            favouriteProductIdsTemp = Set.of();
+        }
+        final Set<Long> favouriteIds = favouriteProductIdsTemp;
+        return products.stream()
+                .map(product ->
+                        buildResponse(
+                                product,
+                                imagesByProductId.getOrDefault(product.getId(), List.of()),
+                                favouriteIds
+                        )
+                ).toList();
     }
 
-    private void applyFavouriteFlag(Product product, ProductDTO.Response response) {
-        try {
-            Users currentUser = userService.getCurrentUser();
-
-            boolean isFavourite = favouriteRepository
-                    .existsByUserAndProduct(currentUser, product);
-
-            response.setIsFavourite(isFavourite);
-
-        } catch (Exception e) {
-            // not authenticated
-            response.setIsFavourite(false);
+    @Override
+    @Transactional
+    public void saveImages(Long productId, List<String> keys) {
+        if(keys == null || keys.isEmpty()) {
+            throw new InvalidRequestFieldException("Keys cannot be empty");
         }
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        for(String key : keys) {
+            if(key == null || key.isBlank()) { continue; }
+
+            Image img = new Image();
+            img.setProduct(product);
+            img.setImageUrl(key);
+            imageRepository.save(img);
+        }
+    }
+
+    private ProductDTO.Response buildResponse(Product product, List<String> images, Set<Long> favouriteProductIds) {
+        ProductDTO.Response response = productMapper.toResponse(product);
+
+        response.setImages(images);
+
+        response.setIsFavourite(
+                favouriteProductIds != null &&
+                favouriteProductIds.contains(product.getId())
+        );
+
+        return response;
     }
 }
