@@ -138,20 +138,20 @@ public class MessageServiceImpl implements MessageService {
                 conversationRepository
                         .findByUsersAndProduct(
                                 sender.getId(),
-                                product.getUser().getId(),
+                                request.getReceiverId(),
                                 product.getId()
                         )
                         .orElseGet(() ->
-                                createConversation(sender, product.getUser(), product)
+                                createConversation(sender, userRepository.findById(request.getReceiverId()).get(), product)
                         );
 
-        Users receiver = conversation.getUser1().getId().equals(sender.getId())? conversation.getUser2(): conversation.getUser1();
+        //Users receiver = conversation.getUser1().getId().equals(sender.getId())? conversation.getUser2(): conversation.getUser1();
 
 
         Message message = new Message();
         message.setConversation(conversation);
         message.setSender(sender);
-        message.setReceiver(receiver);
+        message.setReceiver(userRepository.findById(request.getReceiverId()).get());
         message.setContent(request.getContent());
         message.setSentAt(LocalDateTime.now());
         message.setRead(false);
@@ -164,7 +164,7 @@ public class MessageServiceImpl implements MessageService {
                 .conversationId(conversation.getId())
                 .sentAt(saved.getSentAt())
                 .content(saved.getContent())
-                .receiverId(receiver.getId())
+                .receiverId(userRepository.findById(request.getReceiverId()).get().getId())
                 .build();
     }
 
