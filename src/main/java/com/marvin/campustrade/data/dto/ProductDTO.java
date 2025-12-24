@@ -29,10 +29,6 @@ public class ProductDTO {
 
         @NotNull(message = "Category is required")
         private Category category;
-
-        @NotNull(message = "Images cannot be null")
-        @Size(min = 1, message = "At least one image must be provided")
-        private List<@NotBlank(message = "Image URL cannot be empty") String> images;
     }
 
     @Getter
@@ -48,9 +44,6 @@ public class ProductDTO {
 
         @DecimalMin(value = "0.0", inclusive = false, message = "Price must be positive")
         private BigDecimal price;
-
-        @Size(min = 1, message = "At least one image must be provided")
-        private List<@NotBlank(message = "Image URL cannot be empty") String> images;
     }
 
     @Getter
@@ -65,7 +58,7 @@ public class ProductDTO {
         private BigDecimal price;
         private Category category;
         private String universityName;
-        private List<String> images;
+        private List<String> images;    //this returns imageKeys (what is being hold in db)
         private Boolean isFavourite;
         private Status status;
 

@@ -9,6 +9,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ImageDTO {
 
+    // ------------------------- PRESIGN --------------------
     @Getter
     @Setter
     @NoArgsConstructor
@@ -48,6 +49,8 @@ public class ImageDTO {
         private String uploadUrl;
     }
 
+
+    // ------------------------- SAVE --------------------
     @Getter
     @Setter
     @NoArgsConstructor
@@ -55,5 +58,24 @@ public class ImageDTO {
     public static class SaveImagesRequest {
         @NotEmpty(message = "Image keys cannot be empty")
         private List<@NotBlank String> imageKeys;
+    }
+
+
+    // ------------------------- GET --------------------
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ImageListResponse {
+        private List<ImageResponse> images;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ImageResponse {
+        private String key;
+        private String url;
     }
 }

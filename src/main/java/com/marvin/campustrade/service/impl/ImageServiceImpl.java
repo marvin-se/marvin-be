@@ -3,14 +3,20 @@ package com.marvin.campustrade.service.impl;
 import com.marvin.campustrade.data.dto.ImageDTO;
 import com.marvin.campustrade.data.entity.Image;
 import com.marvin.campustrade.data.entity.Product;
+import com.marvin.campustrade.exception.ProductNotFoundException;
 import com.marvin.campustrade.repository.ImageRepository;
+import com.marvin.campustrade.repository.ProductRepository;
 import com.marvin.campustrade.service.ImageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
@@ -27,17 +33,19 @@ public class ImageServiceImpl implements ImageService {
     );
 
     private final ImageRepository imageRepository;
+    private final ProductRepository productRepository;
     private final String bucketName;
     private final S3Presigner presigner;
     private final S3Client s3Client;
 
     public ImageServiceImpl(
-            ImageRepository imageRepository,
+            ImageRepository imageRepository, ProductRepository productRepository,
             @Value("${aws.s3.bucket}") String bucketName,
             S3Presigner presigner,
             S3Client s3Client
     ) {
         this.imageRepository = imageRepository;
+        this.productRepository = productRepository;
         this.bucketName = bucketName;
         this.presigner = presigner;
         this.s3Client = s3Client;
@@ -101,6 +109,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
+    @Transactional
     public void deleteImagesByProduct(Product product) {
 
         // fetch keys
@@ -121,5 +130,69 @@ public class ImageServiceImpl implements ImageService {
 
         // delete DB rows
         imageRepository.deleteAllByProduct(product);
+    }
+
+    @Override
+    public List<String> getImageKeysByProductId(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        return imageRepository.findByProduct(product)
+                .stream()
+                .map(Image::getImageUrl) // S3 key
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void deleteImage(Long productId, String imageKey) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        Image image = imageRepository
+                .findByProductAndImageUrl(product, imageKey)
+                .orElseThrow(() -> new IllegalArgumentException("Image not found"));
+
+        imageRepository.delete(image);
+
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(imageKey)
+                .build());
+    }
+
+    @Override
+    public ImageDTO.ImageListResponse getImagesWithPresignedUrls(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+        List<Image> images = imageRepository.findByProduct(product);
+
+        List<ImageDTO.ImageResponse> result = images.stream()
+                .map(image -> {
+
+                    GetObjectRequest getRequest = GetObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(image.getImageUrl())
+                            .build();
+
+                    GetObjectPresignRequest presignRequest =
+                            GetObjectPresignRequest.builder()
+                                    .signatureDuration(Duration.ofMinutes(10))
+                                    .getObjectRequest(getRequest)
+                                    .build();
+
+                    String url = presigner
+                            .presignGetObject(presignRequest)
+                            .url()
+                            .toString();
+
+                    return new ImageDTO.ImageResponse(
+                            image.getImageUrl(), // key
+                            url                  // access url
+                    );
+                })
+                .toList();
+
+        return new ImageDTO.ImageListResponse(result);
     }
 }

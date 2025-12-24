@@ -1,5 +1,6 @@
 package com.marvin.campustrade.repository;
 
+import com.marvin.campustrade.constants.Status;
 import com.marvin.campustrade.data.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -28,4 +29,6 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
           AND p.favouriteCount > 0
     """)
     void decrementFavouriteCount(Long productId);
+
+    List<Product> findAllByStatus(Status status);
 }

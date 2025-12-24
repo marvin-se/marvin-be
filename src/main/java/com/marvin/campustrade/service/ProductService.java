@@ -1,11 +1,13 @@
 package com.marvin.campustrade.service;
 
 import com.marvin.campustrade.data.dto.ProductDTO;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface ProductService {
     ProductDTO.Response createProduct(ProductDTO.CreateRequest request);
+    void publishProduct(Long productId);
     List<ProductDTO.Response> getAllProducts();
     ProductDTO.Response getProductById(Long id);
     void deleteProduct(Long id, Long sellerId);

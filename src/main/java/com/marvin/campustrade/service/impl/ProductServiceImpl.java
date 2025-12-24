@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
         Users user = userService.getCurrentUser();
         Product product = productMapper.toEntity(request);
         product.setUser(user);
-        product.setStatus(Status.AVAILABLE);
+        product.setStatus(Status.DRAFT);
 
         Product saved = productRepository.save(product);    // added new ad to db
 
@@ -52,9 +52,22 @@ public class ProductServiceImpl implements ProductService {
         return response;
     }
 
+    @Transactional
+    @Override
+    public void publishProduct(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        long imageCount = imageRepository.countByProduct(product);
+        if(imageCount < 1) {
+            throw new IllegalStateException("Product must have at least one image");
+        }
+        product.setStatus(Status.AVAILABLE);
+    }
+
     @Override
     public List<ProductDTO.Response> getAllProducts() {
-        List<Product> products = productRepository.findAll();
+        List<Product> products = productRepository.findAllByStatus(Status.AVAILABLE);
 
         List<Image> allImages = imageRepository.findAllByProductIn(products);
 

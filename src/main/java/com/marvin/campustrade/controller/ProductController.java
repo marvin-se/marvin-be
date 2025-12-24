@@ -2,7 +2,6 @@ package com.marvin.campustrade.controller;
 
 import com.marvin.campustrade.data.dto.ImageDTO;
 import com.marvin.campustrade.data.dto.ProductDTO;
-import com.marvin.campustrade.service.AuthenticationService;
 import com.marvin.campustrade.service.ImageService;
 import com.marvin.campustrade.service.ProductService;
 import com.marvin.campustrade.service.UserService;
@@ -26,6 +25,12 @@ public class ProductController {
             @Valid @RequestBody ProductDTO.CreateRequest request
     ) {
         return ResponseEntity.ok(productService.createProduct(request));
+    }
+
+    @PutMapping("/{id}/publish")
+    public ResponseEntity<Void> publishProduct(@PathVariable Long id) {
+        productService.publishProduct(id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("")
@@ -75,7 +80,7 @@ public class ProductController {
     }
 
     @PostMapping("/{id}/images")
-    public ResponseEntity<Void> saveImages(
+    public ResponseEntity<Void> attachImages(
             @PathVariable Long id,
             @Valid @RequestBody ImageDTO.SaveImagesRequest request
     ) {
@@ -83,12 +88,19 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{id}/images")
-    public ResponseEntity<Void> replaceImages(
+    @GetMapping("/{id}/images")
+    public ResponseEntity<ImageDTO.ImageListResponse> getImages(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                imageService.getImagesWithPresignedUrls(id)
+        );
+    }
+
+    @DeleteMapping("/{id}/images")
+    public ResponseEntity<Void> deleteImages(
             @PathVariable Long id,
-            @Valid @RequestBody ImageDTO.SaveImagesRequest request
+            @RequestParam String imageKey
     ) {
-        productService.replaceImages(id, request.getImageKeys());
-        return ResponseEntity.ok().build();
+        imageService.deleteImage(id, imageKey);
+        return ResponseEntity.noContent().build();
     }
 }
