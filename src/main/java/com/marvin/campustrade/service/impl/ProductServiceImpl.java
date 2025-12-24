@@ -253,26 +253,6 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    @Override
-    @Transactional
-    public void replaceImages(Long productId, List<String> keys) {
-        if(keys == null || keys.isEmpty()) {
-            throw new InvalidRequestFieldException("Keys cannot be empty");
-        }
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
-
-        imageService.deleteImagesByProduct(product);
-
-        for(String key : keys) {
-            Image img = new Image();
-            img.setProduct(product);
-            img.setImageUrl(key);
-            imageRepository.save(img);
-        }
-    }
-
     private ProductDTO.Response buildResponse(Product product, List<String> images, Set<Long> favouriteProductIds) {
         ProductDTO.Response response = productMapper.toResponse(product);
 
