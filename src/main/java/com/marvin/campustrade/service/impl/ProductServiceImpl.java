@@ -6,7 +6,6 @@ import com.marvin.campustrade.data.entity.Image;
 import com.marvin.campustrade.data.entity.Product;
 import com.marvin.campustrade.data.entity.Users;
 import com.marvin.campustrade.data.mapper.ProductMapper;
-import com.marvin.campustrade.data.mapper.UserMapper;
 import com.marvin.campustrade.exception.InvalidRequestFieldException;
 import com.marvin.campustrade.exception.ProductNotFoundException;
 import com.marvin.campustrade.exception.UnauthorizedActionException;
@@ -20,7 +19,6 @@ import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -95,9 +93,6 @@ public class ProductServiceImpl implements ProductService {
             if (!product.getUser().getId().equals(currentUser.getId())) {
                 product.setVisitCount(product.getVisitCount() + 1);
                 productRepository.save(product);
-            } else {
-                // owner sees metrics
-                productMapper.includeOwnerMetrics(product, response);
             }
 
         } catch (Exception ignored) {
@@ -172,9 +167,6 @@ public class ProductServiceImpl implements ProductService {
                 .map(product -> {
                     ProductDTO.Response response = productMapper.toResponse(product);
                     response.setIsFavourite(favouriteIds.contains(product.getId()));
-                    if (isOwner) {
-                        productMapper.includeOwnerMetrics(product, response);
-                    }
                     return response;
                 })
                 .toList();
