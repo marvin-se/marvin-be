@@ -17,8 +17,8 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Query("""
         SELECT m
         FROM Message m
-        WHERE m.sentAt IN (
-            SELECT MAX(m2.sentAt)
+        WHERE m.id IN (
+            SELECT MAX(m2.id)
             FROM Message m2
             WHERE m2.conversation.id IN :conversationIds
             GROUP BY m2.conversation.id
