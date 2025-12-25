@@ -214,7 +214,7 @@ public class ProductServiceImpl implements ProductService {
             throw new InvalidRequestFieldException("Ad is already marked as sold.");
         }
 
-        Users buyer = conversation.getUser1().getId().equals(sellerId) ? conversation.getUser2() : userService.getCurrentUser();
+        Users buyer = conversation.getUser1().getId().equals(sellerId) ? conversation.getUser2() : conversation.getUser1();
         Transactions transaction = new  Transactions();
         transaction.setProduct(product);
         transaction.setBuyer(buyer);
