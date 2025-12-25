@@ -2,10 +2,7 @@ package com.marvin.campustrade.service.impl;
 
 import com.marvin.campustrade.common.IncludeInactiveUsers;
 import com.marvin.campustrade.data.dto.message.*;
-import com.marvin.campustrade.data.entity.Conversation;
-import com.marvin.campustrade.data.entity.Message;
-import com.marvin.campustrade.data.entity.Product;
-import com.marvin.campustrade.data.entity.Users;
+import com.marvin.campustrade.data.entity.*;
 import com.marvin.campustrade.data.mapper.ConversationMapper;
 import com.marvin.campustrade.repository.*;
 import com.marvin.campustrade.service.MessageService;
@@ -42,6 +39,7 @@ public class MessageServiceImpl implements MessageService {
 
         Users currentUser = userService.getCurrentUser();
 
+
         List<Conversation> conversations =
                 conversationRepository.findByUser1_IdOrUser2_Id(
                         currentUser.getId(),
@@ -50,34 +48,40 @@ public class MessageServiceImpl implements MessageService {
 
         if (conversations.isEmpty()) {
             return ConversationList.builder()
-                    .conversations(Collections.emptyList())
+                    .conversations(List.of())
                     .numberOfConversations(0L)
                     .build();
         }
+
 
         List<Long> conversationIds = conversations.stream()
                 .map(Conversation::getId)
                 .toList();
 
+
         List<Message> lastMessages =
                 messageRepository.findLastMessagesForConversations(conversationIds);
+
 
         Map<Long, Message> lastMessageMap = lastMessages.stream()
                 .collect(Collectors.toMap(
                         m -> m.getConversation().getId(),
-                        m -> m
+                        m -> m,
+                        (m1, m2) -> m1
                 ));
 
-        List<ConversationDTO> dtos = new ArrayList<>();
+        List<ConversationDTO> conversationDtos = new ArrayList<>();
+
 
         for (Conversation conversation : conversations) {
 
-            // Determine other participant
-            Users otherUser = conversation.getUser1().equals(currentUser)
-                    ? conversation.getUser2()
-                    : conversation.getUser1();
+            // Determine the other participant
+            Users otherUser =
+                    conversation.getUser1().getId().equals(currentUser.getId())
+                            ? conversation.getUser2()
+                            : conversation.getUser1();
 
-            // Optional: hide inactive users (remove if not desired)
+            // Skip inactive users (optional rule)
             if (!otherUser.getIsActive()) {
                 continue;
             }
@@ -85,16 +89,23 @@ public class MessageServiceImpl implements MessageService {
             ConversationDTO dto =
                     conversationMapper.toConversationDTO(conversation, currentUser.getId());
 
+
+            dto.setImageUrl(
+                    imageRepository.findByProduct(conversation.getProduct())
+                            .stream()
+                            .findFirst()
+                            .map(Image::getImageUrl)
+                            .orElse(null)
+            );
+
+
             Message lastMessage = lastMessageMap.get(conversation.getId());
 
-            dto.setImageUrl(imageRepository.findByProduct(conversation.getProduct())
-                    .stream().findFirst().get().getImageUrl()
-            );
             if (lastMessage != null) {
 
                 boolean readByCurrentUser =
-                        lastMessage.isRead() ||
-                                lastMessage.getSender().getId().equals(currentUser.getId());
+                        lastMessage.isRead()
+                                || lastMessage.getSender().getId().equals(currentUser.getId());
 
                 dto.setLastMessage(
                         LastMessageDTO.builder()
@@ -107,10 +118,11 @@ public class MessageServiceImpl implements MessageService {
                 );
             }
 
-            dtos.add(dto);
+            conversationDtos.add(dto);
         }
 
-        dtos.sort(
+        // 8️⃣ Sort by last message date (most recent first)
+        conversationDtos.sort(
                 Comparator.comparing(
                         dto -> dto.getLastMessage() != null
                                 ? dto.getLastMessage().getSentAt()
@@ -119,11 +131,13 @@ public class MessageServiceImpl implements MessageService {
                 )
         );
 
+        // 9️⃣ Return response
         return ConversationList.builder()
-                .conversations(dtos)
-                .numberOfConversations((long) dtos.size())
+                .conversations(conversationDtos)
+                .numberOfConversations((long) conversationDtos.size())
                 .build();
     }
+
 
     @Override
     @Transactional
