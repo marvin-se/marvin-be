@@ -208,6 +208,12 @@ public class MessageServiceImpl implements MessageService {
                                 product
                         ));
 
+
+        messageRepository.markMessagesAsRead(
+                conversation,
+                currentUser.getId()
+        );
+
         List<Message> messages =
                 messageRepository.findByConversationOrderBySentAtAsc(conversation);
 
@@ -226,6 +232,7 @@ public class MessageServiceImpl implements MessageService {
 
         return dto;
     }
+
 
     @Override
     @Transactional
