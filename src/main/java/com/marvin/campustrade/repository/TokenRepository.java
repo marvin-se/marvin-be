@@ -34,4 +34,6 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
         )
     """)
     int deleteDeadTokens(@Param("type") TokenType type);
+
+    void deleteAllByUser(Users user);
 }
