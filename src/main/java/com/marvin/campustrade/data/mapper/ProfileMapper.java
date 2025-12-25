@@ -7,7 +7,8 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ProfileMapper {
-    @Mapping(target = "universityId", source = "university.id")
-    @Mapping(target = "universityName", source = "university.name")
+
+    @Mapping(target = "universityId", source = "user.university.id")
+    @Mapping(target = "universityName", source = "user.university.name")
     ProfileResponse toResponse(Users user);
 }

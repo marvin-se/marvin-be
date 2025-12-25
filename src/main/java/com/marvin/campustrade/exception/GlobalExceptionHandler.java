@@ -95,4 +95,10 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ex.getMessage());
     }
+    @ExceptionHandler(BlockedByException.class)
+    public ResponseEntity<String> handleBlocked(BlockedByException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ex.getMessage());
+    }
 }
