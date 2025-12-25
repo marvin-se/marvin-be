@@ -8,10 +8,10 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "MESSAGE",indexes = {
-        @Index(columnList = "SENDER_ID"),
-        @Index(columnList = "RECEIVER_ID"),
-        @Index(columnList = "CONVERSATION_ID")
+@Table(name = "message",indexes = {
+        @Index(columnList = "sender_id"),
+        @Index(columnList = "receiver_id"),
+        @Index(columnList = "conversation_id")
 })
 @Setter
 @Getter
@@ -22,25 +22,25 @@ public class Message {
     @Column(updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "CONTENT", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "IS_READ", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_read", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean isRead = false;
 
-    @Column(name = "SENT_AT", nullable = false)
+    @Column(name = "sent_at", nullable = false)
     private LocalDateTime sentAt;
 
     @ManyToOne(optional = true)
-    @JoinColumn(name = "SENDER_ID")
+    @JoinColumn(name = "sender_id")
     private Users sender;
 
     @ManyToOne(optional = true)
-    @JoinColumn(name = "RECEIVER_ID")
+    @JoinColumn(name = "receiver_id")
     private Users receiver;
 
     @ManyToOne
-    @JoinColumn(name = "CONVERSATION_ID", nullable = false)
+    @JoinColumn(name = "conversation_id", nullable = false)
     private Conversation conversation;
 
     @PrePersist

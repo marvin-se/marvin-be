@@ -2,6 +2,7 @@ package com.marvin.campustrade.controller;
 
 import com.marvin.campustrade.data.dto.auth.*;
 import com.marvin.campustrade.service.AuthenticationService;
+import com.marvin.campustrade.service.EmailService;
 import com.marvin.campustrade.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final UserService userService;
     private final AuthenticationService authService;
+    private final EmailService emailService;
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -24,6 +26,12 @@ public class AuthController {
     public ResponseEntity<String> verify(@Valid @RequestBody VerifyRequest request) {
         userService.verifyUser(request);
         return ResponseEntity.ok("Your account has been verified! You can now log in.");
+    }
+
+    @PostMapping("/resend")
+    public ResponseEntity<String> resendVerificationEmail(@Valid @RequestBody ResendVerificationCodeDTO request) {
+        userService.resendVerificationEmail(request);
+        return ResponseEntity.ok("Your verification token has been resend!");
     }
 
     @PostMapping("/forgot-password")

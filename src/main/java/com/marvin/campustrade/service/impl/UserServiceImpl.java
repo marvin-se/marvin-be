@@ -1,33 +1,33 @@
 package com.marvin.campustrade.service.impl;
 
+import com.marvin.campustrade.common.IncludeInactiveUsers;
 import com.marvin.campustrade.constants.RequestType;
 import com.marvin.campustrade.constants.TokenType;
 import com.marvin.campustrade.data.dto.auth.*;
-import com.marvin.campustrade.data.entity.University;
-import com.marvin.campustrade.data.entity.Users;
-import com.marvin.campustrade.data.entity.Token;
+import com.marvin.campustrade.data.dto.user.*;
+import com.marvin.campustrade.data.entity.*;
+import com.marvin.campustrade.data.mapper.BlockMapper;
+import com.marvin.campustrade.data.mapper.ProfileMapper;
+import com.marvin.campustrade.data.mapper.TransactionMapper;
 import com.marvin.campustrade.data.mapper.UserMapper;
 import com.marvin.campustrade.exception.EmailAlreadyExistsException;
 import com.marvin.campustrade.exception.InvalidStudentEmailDomainException;
 import com.marvin.campustrade.exception.UniversityNotFoundException;
-import com.marvin.campustrade.repository.UniversityRepository;
-import com.marvin.campustrade.repository.UserRepository;
-import com.marvin.campustrade.repository.TokenRepository;
+import com.marvin.campustrade.repository.*;
 import com.marvin.campustrade.service.EmailService;
 import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Random;
-import java.util.UUID;
-
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -38,21 +38,44 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final EmailService emailService;
+    private final ProfileMapper  profileMapper;
+    private final UsersBlockRepository usersBlockRepository;
+    private final BlockMapper blockMapper;
+    private final TransactionRepository  transactionRepository;
+    private final TransactionMapper  transactionMapper;
 
     @Override
-    public UserResponse createUser(RegisterRequest request){
-        // Check if the email is already in use
-        if(userRepository.findByEmail(request.getEmail()).isPresent()){
-            throw new EmailAlreadyExistsException("Email is already registered");
+    @IncludeInactiveUsers
+    @Transactional
+    public UserResponse createUser(RegisterRequest request) {
+
+        Optional<Users> existingUserOpt = userRepository.findByEmail(request.getEmail());
+
+        Users user;
+
+        if (existingUserOpt.isPresent()) {
+            user = existingUserOpt.get();
+
+            if (Boolean.TRUE.equals(user.getIsActive())) {
+                throw new EmailAlreadyExistsException("Email already exists");
+            }
+            user.setIsActive(true);
+            user.setIsVerified(false);
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        } else {
+            user = userMapper.toEntity(request);
+            user.setIsActive(true);
+            user.setIsVerified(false);
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         }
-        // TO DO: Do we have all possible universities in the database?
+
         // Load university
         University university = universityRepository.findByName(request.getUniversity())
                 .orElseThrow(() -> new UniversityNotFoundException("University not found"));
 
-        // Validate student email domain
+        // Validate email domain
         String email = request.getEmail();
-        String requiredDomain = university.getDomain();   // e.g. "itu.edu.tr"
+        String requiredDomain = university.getDomain();
 
         if (!email.toLowerCase().endsWith("@" + requiredDomain.toLowerCase())) {
             throw new InvalidStudentEmailDomainException(
@@ -60,12 +83,10 @@ public class UserServiceImpl implements UserService {
             );
         }
 
-        Users user = userMapper.toEntity(request);
         user.setUniversity(university);
-        user.setIsVerified(false);
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+
         userRepository.save(user);
-        // create token
+
         String code = String.format("%06d", new Random().nextInt(999999));
         Token token = new Token();
         token.setContent(code);
@@ -74,11 +95,11 @@ public class UserServiceImpl implements UserService {
         token.setUser(user);
         tokenRepository.save(token);
 
-        // send email
         emailService.sendVerificationEmail(user.getEmail(), token);
 
         return userMapper.toResponse(user);
     }
+
 
     @Override
     public Users getCurrentUser(){
@@ -118,15 +139,25 @@ public class UserServiceImpl implements UserService {
     public void generateResetEmail(ForgotPasswordRequest request) {
         Users user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        String code = String.format("%06d", new Random().nextInt(999999));
-        Token token = new Token();
+
+        String code = String.format("%06d", new Random().nextInt(1_000_000));
+
+        Token token = tokenRepository
+                .findByUserAndType(user, TokenType.PASSWORD_RESET)
+                .orElseGet(() -> {
+                    Token t = new Token();
+                    t.setUser(user);
+                    t.setType(TokenType.PASSWORD_RESET);
+                    return t;
+                });
+
         token.setContent(code);
-        token.setType(TokenType.PASSWORD_RESET);
         token.setExpiresAt(LocalDateTime.now().plusMinutes(15));
-        token.setUser(user);
+
         tokenRepository.save(token);
         emailService.sendResetEmail(user.getEmail(), token);
     }
+
     @Override
     public void verifyResetCode(VerifyRequest request){
         Users user = userRepository.findByEmail(request.getEmail())
@@ -152,10 +183,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void resendVerificationEmail(ResendVerificationCodeDTO request){
+        Users user  = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        Optional<Token> token = tokenRepository.findByUserAndType(user, TokenType.EMAIL_VERIFICATION);
+        if(token.isPresent()){
+            String code = String.format("%06d", new Random().nextInt(999999));
+            token.get().setContent(code);
+            token.get().setExpiresAt(LocalDateTime.now().plusMinutes(15));
+            tokenRepository.save(token.get());
+            emailService.sendVerificationEmail(user.getEmail(), token.get());
+        }
+        else{
+            String code = String.format("%06d", new Random().nextInt(999999));
+            Token newToken = new Token();
+            newToken.setContent(code);
+            newToken.setType(TokenType.EMAIL_VERIFICATION);
+            newToken.setExpiresAt(LocalDateTime.now().plusMinutes(15));
+            newToken.setUser(user);
+            tokenRepository.save(newToken);
+            emailService.sendVerificationEmail(user.getEmail(), newToken);
+        }
+    }
+
+    @Override
     public void changePassword(ChangePassword request) {
 
         if (request.getType() == RequestType.FORGOT_PASSWORD) {
-
             Users user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -183,6 +238,177 @@ public class UserServiceImpl implements UserService {
             // Delete token after successful password reset
             tokenRepository.delete(token);
         }
+        if(request.getType() == RequestType.CHANGE_PASSWORD){
+            Users user = getCurrentUser();
+            if(!(user.getIsVerified() && user.getIsActive())){
+                throw new RuntimeException("User is not verified");
+            }
+            if(Objects.equals(request.getOldPassword(), request.getNewPassword())){
+                throw new RuntimeException("New password can not be same with old password");
+            }
+            if(!Objects.equals(request.getNewPassword(), request.getConfirmNewPassword())){
+                throw new RuntimeException("New passwords do not match");
+            }
+            user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user);
+        }
     }
 
+    @Override
+    public UserResponse getCurrentProfile(){
+        Users user = getCurrentUser();
+        if(!(user.getIsVerified() && user.getIsActive())){
+            throw new RuntimeException("User is not valid for this function");
+        }
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public UserResponse editProfile(EditProfileRequest request){
+        System.out.println("Editing profile: " + request);
+        Users user = getCurrentUser();
+        System.out.println("Current user: " + user);
+        if(!(user.getIsVerified() && user.getIsActive())){
+            throw new RuntimeException("User is not valid for this function");
+        }
+        user.setFullName(request.getFullName());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setDescription(request.getDescription());
+        userRepository.save(user);
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public void deleteProfile(){
+        Users user = getCurrentUser();
+        if(!(user.getIsVerified() && user.getIsActive())){
+            throw new RuntimeException("User is not valid for this function");
+        }
+        user.setIsActive(false);
+        userRepository.delete(user);
+    }
+
+    @Override
+    public ProfileResponse getUser(String id) {
+
+        Users viewer = getCurrentUser();
+        if (!viewer.getIsActive() || !viewer.getIsVerified()) {
+            throw new RuntimeException("You are not allowed to view profiles");
+        }
+
+        Long userId = Long.parseLong(id);
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getIsActive() || !user.getIsVerified()) {
+            throw new RuntimeException("This profile is not available");
+        }
+
+        return profileMapper.toResponse(user);
+    }
+
+    @Override
+    public BlockResponse blockUser(String id) {
+        Users blocker = getCurrentUser();
+
+        if (!blocker.getIsActive() || !blocker.getIsVerified()) {
+            throw new RuntimeException("You are not allowed to block profiles");
+        }
+
+        Long userId = Long.parseLong(id);
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getIsActive() || !user.getIsVerified()) {
+            throw new RuntimeException("This profile is not available");
+        }
+
+        if (usersBlockRepository.findByBlockerAndBlocked(blocker, user).isPresent()) {
+            throw new RuntimeException("This user is already blocked.");
+        }
+
+        UsersBlock blocking = new UsersBlock();
+        blocking.setBlocker(blocker);
+        blocking.setBlocked(user);
+        usersBlockRepository.save(blocking);
+
+        return blockMapper.toBlock(user);
+    }
+
+    @Override
+    public BlockResponse unblockUser(String id) {
+        Users blocker = getCurrentUser();
+
+        if (!blocker.getIsActive() || !blocker.getIsVerified()) {
+            throw new RuntimeException("You are not allowed to block profiles");
+        }
+
+        Long userId = Long.parseLong(id);
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getIsActive() || !user.getIsVerified()) {
+            throw new RuntimeException("This profile is not available");
+        }
+
+        UsersBlock blocking = usersBlockRepository.findByBlockerAndBlocked(blocker, user)
+                .orElseThrow(() -> new RuntimeException("This user is not blocked"));
+
+        usersBlockRepository.delete(blocking);
+
+        return blockMapper.toBlock(user);
+    }
+
+    @Override
+    public SalesResponseDTO getSalesHistory() {
+
+        Users currentUser = getCurrentUser();
+
+        List<Transactions> salesList =
+                transactionRepository.findTransactionBySellerId(currentUser.getId())
+                        .orElseThrow(() -> new RuntimeException("You did not sold any item!"));
+
+        List<TransactionDTO> transactionDTOs =
+                transactionMapper.toDtoList(salesList);
+
+        return SalesResponseDTO.builder()
+                .transactions(transactionDTOs)
+                .build();
+    }
+
+    @Override
+    public PurchaseResponseDTO getPurchaseHistory() {
+
+        Users currentUser = getCurrentUser();
+
+        List<Transactions> purchaseList =
+                transactionRepository.findTransactionByBuyerId(currentUser.getId())
+                        .orElseThrow(() -> new RuntimeException("You did not purchase any item!"));
+
+        List<TransactionDTO> transactionDTOs =
+                transactionMapper.toDtoList(purchaseList);
+
+        return PurchaseResponseDTO.builder()
+                .transactions(transactionDTOs)
+                .build();
+    }
+
+
+
+    ////hilal filter testi silebilirsiniz
+    //includeInactive'i koymadım yani active olmayan user hata vermeli
+    @Override
+    public UserResponse findActiveUserByEamil(String email){
+        return userMapper.toResponse(userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found")));
+    }
+
+    //active olmayan user dönmeli
+    @Override
+    @IncludeInactiveUsers
+    @Transactional //have to be transactional because of the custom aspect (IncludeInactiveUsers)
+    public UserResponse findInActiveUserByEmail(String email){
+        return userMapper.toResponse(userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found")));
+    }
 }

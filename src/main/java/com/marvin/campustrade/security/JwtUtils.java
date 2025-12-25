@@ -3,19 +3,25 @@ package com.marvin.campustrade.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 
 @Component
 @Slf4j
 public class JwtUtils {
     @Value("${jwt.secret}")
     private String jwtSecret;
+    @Getter
     @Value("${jwt.expiration}")
     private int jwtExpirationMs;
 
@@ -52,5 +58,20 @@ public class JwtUtils {
             log.error("JWT validation error: {}", e.getMessage());
         }
         return false;
+    }
+
+    public Authentication getAuthentication(String token) {
+
+        String email = getUserFromToken(token);
+
+        // Optional: extract roles from JWT claims later
+        List<SimpleGrantedAuthority> authorities =
+                List.of(new SimpleGrantedAuthority("ROLE_USER"));
+
+        return new UsernamePasswordAuthenticationToken(
+                email,
+                null,
+                authorities
+        );
     }
 }

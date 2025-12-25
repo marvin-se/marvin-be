@@ -10,11 +10,11 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 @Entity
-@Table(name = "PRODUCT",
+@Table(name = "product",
 indexes = {
-                @Index(columnList = "CATEGORY"),
-                @Index(columnList = "STATUS"),
-                @Index(columnList = "USER_ID")
+                @Index(columnList = "category"),
+                @Index(columnList = "status"),
+                @Index(columnList = "user_id")
         })
 @Setter
 @Getter
@@ -25,31 +25,37 @@ public class Product {
     @Column(updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "TITLE", nullable = false, length = 200)
+    @Column(name = "title", nullable = false, length = 200)
     private String title;
 
-    @Column(name = "DESCRIPTION", length = 500)
+    @Column(name = "description", length = 500)
     private String description;
 
-    @Column(name = "PRICE", precision = 10, scale = 2)
+    @Column(name = "price", precision = 10, scale = 2)
     private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "CATEGORY", nullable = false)
+    @Column(name = "category", nullable = false)
     private Category category;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATUS", nullable = false)
+    @Column(name = "status", nullable = false)
     private Status status;
 
-    @Column(name = "CREATED_AT")
+    @Column(name = "fav_count", nullable = false)
+    private Long favouriteCount = 0L;
+
+    @Column(name = "visit_count", nullable = false)
+    private Long visitCount = 0L;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "UPDATED_AT")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "USER_ID", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
     @PrePersist

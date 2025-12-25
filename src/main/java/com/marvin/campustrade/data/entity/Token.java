@@ -9,9 +9,9 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "TOKEN",
+@Table(name = "token",
         indexes = {
-                @Index(columnList = "USER_ID"),
+                @Index(columnList = "user_id"),
         })
 @Setter
 @Getter
@@ -23,17 +23,17 @@ public class Token {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @Column(name = "CONTENT", nullable = false)
+    @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "CREATED_AT")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TYPE")
+    @Column(name = "type")
     private TokenType type;
 
     @PrePersist
@@ -41,10 +41,15 @@ public class Token {
         this.createdAt = LocalDateTime.now();
     }
 
-    @Column(name = "EXPIRES_AT", nullable = false)
+    @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    @Column(name = "IS_VERIFIED", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_verified", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isVerified = false;
 
+    @Column(name = "is_expired")
+    private boolean isExpired = false;
+
+    @Column(name = "is_revoked")
+    private boolean isRevoked = false;
 }
