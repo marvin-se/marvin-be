@@ -29,6 +29,12 @@ public interface UsersBlockRepository extends JpaRepository<UsersBlock, Long>{
         where ub.blocked = :user
     """)
     Set<Long> findUsersWhoBlockedMeIds(@Param("user") Users user);
+    @Query("""
+        select ub.blocked
+        from UsersBlock ub
+        where ub.blocker = :user
+    """)
+    Optional<List<Users>> findBlockedUsers(Users user);
 
     void deleteAllByBlocker(Users blocker);
 
