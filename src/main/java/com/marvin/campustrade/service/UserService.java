@@ -25,7 +25,9 @@ public interface UserService {
     // profile - pic
     ProfileImageDTO.PresignResponse presignProfilePicture(ProfileImageDTO.PresignRequest request);
     void saveProfilePicture(ProfileImageDTO.SaveRequest request);
-    ProfileImageDTO.ViewResponse getProfilePicture();
+    ProfileImageDTO.ViewResponse getUserProfilePicture(Long userId);
+
+    ProfileImageDTO.ViewResponse getMyProfilePicture();
 
     //hilal filter testi silebilirsiniz
     UserResponse findActiveUserByEamil(String email);
