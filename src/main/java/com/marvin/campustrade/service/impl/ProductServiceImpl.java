@@ -2,18 +2,10 @@ package com.marvin.campustrade.service.impl;
 
 import com.marvin.campustrade.constants.Status;
 import com.marvin.campustrade.data.dto.ProductDTO;
-import com.marvin.campustrade.data.entity.Image;
-import com.marvin.campustrade.data.entity.Product;
-import com.marvin.campustrade.data.entity.Users;
+import com.marvin.campustrade.data.entity.*;
 import com.marvin.campustrade.data.mapper.ProductMapper;
-import com.marvin.campustrade.exception.InvalidRequestFieldException;
-import com.marvin.campustrade.exception.ProductNotFoundException;
-import com.marvin.campustrade.exception.UnauthorizedActionException;
-import com.marvin.campustrade.exception.UserNotFoundException;
-import com.marvin.campustrade.repository.FavouriteRepository;
-import com.marvin.campustrade.repository.ImageRepository;
-import com.marvin.campustrade.repository.ProductRepository;
-import com.marvin.campustrade.repository.UserRepository;
+import com.marvin.campustrade.exception.*;
+import com.marvin.campustrade.repository.*;
 import com.marvin.campustrade.service.ImageService;
 import com.marvin.campustrade.service.ProductService;
 import com.marvin.campustrade.service.UserService;
@@ -21,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +29,9 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final ConversationRepository conversationRepository;
+    private final TransactionRepository transactionRepository;
+    private final UsersBlockRepository usersBlockRepository;
 
     @Override
     public ProductDTO.Response createProduct(ProductDTO.CreateRequest request) {
@@ -67,7 +63,36 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO.Response> getAllProducts() {
-        List<Product> products = productRepository.findAllByStatus(Status.AVAILABLE);
+
+        Users currentUser = null;
+        Set<Long> blockedUserIds = Set.of();
+
+        try {
+            currentUser = userService.getCurrentUser();
+
+            Set<Long> blockedByMe =
+                    usersBlockRepository.findBlockedUserIds(currentUser);
+
+            Set<Long> blockedMe =
+                    usersBlockRepository.findUsersWhoBlockedMeIds(currentUser);
+
+            blockedUserIds = new HashSet<>();
+            blockedUserIds.addAll(blockedByMe);
+            blockedUserIds.addAll(blockedMe);
+
+        } catch (Exception ignored) {
+            // User not logged in → show all products
+        }
+
+        List<Product> products;
+        if (blockedUserIds.isEmpty()) {
+            products = productRepository.findAllByStatus(Status.AVAILABLE);
+        } else {
+            products = productRepository.findAvailableProductsExcludingUsers(
+                    Status.AVAILABLE,
+                    blockedUserIds
+            );
+        }
 
         List<Image> allImages = imageRepository.findAllByProductIn(products);
 
@@ -78,34 +103,42 @@ public class ProductServiceImpl implements ProductService {
                                 Collectors.mapping(Image::getImageUrl, Collectors.toList())
                         ));
 
-        Set<Long> favouriteProductIdsTemp;
+        Set<Long> favouriteProductIds;
         try {
-            Users currentUser = userService.getCurrentUser();
-            favouriteProductIdsTemp =
-                    favouriteRepository.findFavouriteProductIds(
-                            currentUser, products
-                    );
+            favouriteProductIds =
+                    favouriteRepository.findFavouriteProductIds(currentUser, products);
         } catch (Exception ignored) {
-            favouriteProductIdsTemp = Set.of();
+            favouriteProductIds = Set.of();
         }
 
-        final Set<Long> favouriteProductIds = favouriteProductIdsTemp;
-
+        Set<Long> finalFavouriteProductIds = favouriteProductIds;
         return products.stream()
                 .map(product ->
                         buildResponse(
                                 product,
                                 imagesByProductId.getOrDefault(product.getId(), List.of()),
-                                favouriteProductIds
+                                finalFavouriteProductIds
                         )
                 )
                 .toList();
     }
 
+
+
     @Override
     public ProductDTO.Response getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        Users owner = product.getUser();
+
+        if(usersBlockRepository.findByBlockerAndBlocked(owner, userService.getCurrentUser()).isPresent()){
+            throw new BlockedByException("You are blocked.");
+        }
+
+        if(usersBlockRepository.findByBlockerAndBlocked(userService.getCurrentUser(), owner).isPresent()){
+            throw new BlockedByException("You blocked this user.");
+        }
 
         List<String> images = imageRepository.findByProduct(product)
                 .stream()
@@ -169,7 +202,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO.Response markAsSold(Long id, Long sellerId) {
-        Product product = productRepository.findById(id)
+        Conversation conversation = conversationRepository.findById(id)
+                .orElseThrow(() -> new ConversationNotFoundException("Conversation not found"));
+        Product product = productRepository.findById(conversation.getProduct().getId())
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
         if(!product.getUser().getId().equals(sellerId)) {
             throw new UnauthorizedActionException("You can only mark your own products");
@@ -179,6 +214,12 @@ public class ProductServiceImpl implements ProductService {
             throw new InvalidRequestFieldException("Ad is already marked as sold.");
         }
 
+        Users buyer = conversation.getUser1().getId().equals(sellerId) ? conversation.getUser2() : conversation.getUser1();
+        Transactions transaction = new  Transactions();
+        transaction.setProduct(product);
+        transaction.setBuyer(buyer);
+        transaction.setSeller(userService.getCurrentUser());
+        transactionRepository.save(transaction);
         product.setStatus(Status.SOLD);
         return productMapper.toResponse(productRepository.save(product));
     }

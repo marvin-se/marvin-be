@@ -12,9 +12,7 @@ import com.marvin.campustrade.data.mapper.BlockMapper;
 import com.marvin.campustrade.data.mapper.ProfileMapper;
 import com.marvin.campustrade.data.mapper.TransactionMapper;
 import com.marvin.campustrade.data.mapper.UserMapper;
-import com.marvin.campustrade.exception.EmailAlreadyExistsException;
-import com.marvin.campustrade.exception.InvalidStudentEmailDomainException;
-import com.marvin.campustrade.exception.UniversityNotFoundException;
+import com.marvin.campustrade.exception.*;
 import com.marvin.campustrade.repository.*;
 import com.marvin.campustrade.service.EmailService;
 import com.marvin.campustrade.service.ImageService;
@@ -46,6 +44,8 @@ public class UserServiceImpl implements UserService {
     private final BlockMapper blockMapper;
     private final TransactionRepository  transactionRepository;
     private final TransactionMapper  transactionMapper;
+    private final ProductRepository  productRepository;
+    private final FavouriteRepository  favouriteRepository;
     private final ImageService imageService;
 
     @Override
@@ -283,14 +283,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteProfile(){
+    @Transactional
+    public void deleteProfile() {
+
         Users user = getCurrentUser();
-        if(!(user.getIsVerified() && user.getIsActive())){
-            throw new RuntimeException("User is not valid for this function");
+
+        if (!(user.getIsVerified() && user.getIsActive())) {
+            throw new UnauthorizedActionException("User is not valid for this function");
         }
+
+        List<Product> products = productRepository.findAllByUserId(user.getId());
+        productRepository.deleteAll(products);
+
+        List<Favourite> favourites = favouriteRepository.findAllByUser(user);
+        favouriteRepository.deleteAll(favourites);
+
+        usersBlockRepository.deleteAllByBlocker(user);
+        usersBlockRepository.deleteAllByBlocked(user);
+        tokenRepository.deleteAllByUser(user);
         user.setIsActive(false);
         userRepository.delete(user);
     }
+
 
     @Override
     public ProfileResponse getUser(String id) {
@@ -308,6 +322,13 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("This profile is not available");
         }
 
+        if(usersBlockRepository.findByBlockerAndBlocked(viewer, user).isPresent()){
+            throw new BlockedByException("You blocked the user");
+        }
+
+        if(usersBlockRepository.findByBlockerAndBlocked(user, viewer).isPresent()){
+            throw new BlockedByException("You are blocked");
+        }
         return profileMapper.toResponse(user);
     }
 

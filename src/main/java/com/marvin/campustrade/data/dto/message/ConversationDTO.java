@@ -21,4 +21,5 @@ public class ConversationDTO {
     private Long userId;              // other participant
     private LastMessageDTO lastMessage;
     private List<MessageDTO> messages;
+    private String imageUrl;
 }

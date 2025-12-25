@@ -33,6 +33,7 @@ public class MessageServiceImpl implements MessageService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final MessageMapper messageMapper;
+    private final ImageRepository imageRepository;
 
 
     @Transactional
@@ -86,6 +87,9 @@ public class MessageServiceImpl implements MessageService {
 
             Message lastMessage = lastMessageMap.get(conversation.getId());
 
+            dto.setImageUrl(imageRepository.findByProduct(conversation.getProduct())
+                    .stream().findFirst().get().getImageUrl()
+            );
             if (lastMessage != null) {
 
                 boolean readByCurrentUser =
