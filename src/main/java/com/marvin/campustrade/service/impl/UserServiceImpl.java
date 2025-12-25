@@ -451,8 +451,20 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    public ProfileImageDTO.ViewResponse getUserProfilePicture(Long userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (user.getProfilePicUrl() == null) {
+            return new ProfileImageDTO.ViewResponse(null);
+        }
+
+        String url = imageService.presignGet(user.getProfilePicUrl());
+        return new ProfileImageDTO.ViewResponse(url);
+    }
+
     @Override
-    public ProfileImageDTO.ViewResponse getProfilePicture() {
+    public ProfileImageDTO.ViewResponse getMyProfilePicture() {
         Users user = getCurrentUser();
 
         if(user.getProfilePicUrl() == null){

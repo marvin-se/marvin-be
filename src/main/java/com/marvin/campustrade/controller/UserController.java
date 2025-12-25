@@ -78,9 +78,16 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/profile-picture")
-    public ResponseEntity<ProfileImageDTO.ViewResponse> getProfilePicture() {
-        return ResponseEntity.ok(userService.getProfilePicture());
+    @GetMapping("/profile-picture/me")
+    public ResponseEntity<ProfileImageDTO.ViewResponse> getMyProfilePicture() {
+        return ResponseEntity.ok(userService.getMyProfilePicture());
+    }
+
+    @GetMapping("/{userId}/profile-picture")
+    public ResponseEntity<ProfileImageDTO.ViewResponse> getUserProfilePicture(
+            @PathVariable Long userId
+    ) {
+        return ResponseEntity.ok(userService.getUserProfilePicture(userId));
     }
 
     //hilal filter test için silebilirsiniz
