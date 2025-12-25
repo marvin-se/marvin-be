@@ -1,11 +1,83 @@
 spring:
-  profiles:
-    active: prod   # local development için default profil
+  jpa:
+    hibernate:
+      ddl-auto: none   # managed by liquibase
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
 
-# dünyanon en eski commenti artık ne diyo bilmiyom
-# bunu sonra prodda envirment var ile override edeceğiz.
-# SPRING_PROFILES_ACTIVE=prod
-################################
+
+  h2:
+    console:
+      enabled: false
+
+
+
+
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+
+
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/master.yaml
+
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+  ##################AWS S3 CONFIGURATION  #####################
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+
+aws:
+  s3:
+    bucket: ${S3_BUCKET}
+    region: ${AWS_REGION}
+
+
+
+
+
+
+server:
+  port: 8080
+  servlet:
+    context-path: /campustrade
+
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+
+  level:
+    root: INFO
+    com.marvin.campustrade: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 360000
+
+app:
+  base-url: http://localhost:8080
+
+
 
 
 
