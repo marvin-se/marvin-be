@@ -25,10 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -359,6 +356,25 @@ public class UserServiceImpl implements UserService {
         usersBlockRepository.save(blocking);
 
         return blockMapper.toBlock(user);
+    }
+
+    @Override
+    public BlockListResponse getBlockList() {
+        Users user = getCurrentUser();
+        if(!(user.getIsVerified() && user.getIsActive())){
+            throw new RuntimeException("User is not valid for this function");
+        }
+        List<Users> blocked = usersBlockRepository.findBlockedUsers(user)
+                .orElseThrow(() -> new BlockedByException("No blocked users"));
+
+        List<UserResponse> blockeduser = new ArrayList<>();
+
+        for(Users users : blocked){
+            UserResponse userResponse = userMapper.toResponse(users);
+            blockeduser.add(userResponse);
+        }
+
+        return BlockListResponse.builder().userList(blockeduser).numberOfBlocked(blockeduser.size()).build();
     }
 
     @Override

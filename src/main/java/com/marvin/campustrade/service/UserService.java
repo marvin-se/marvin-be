@@ -21,6 +21,7 @@ public interface UserService {
     SalesResponseDTO getSalesHistory();
     PurchaseResponseDTO getPurchaseHistory();
     void resendVerificationEmail(ResendVerificationCodeDTO request);
+    BlockListResponse getBlockList();
 
     // profile - pic
     ProfileImageDTO.PresignResponse presignProfilePicture(ProfileImageDTO.PresignRequest request);

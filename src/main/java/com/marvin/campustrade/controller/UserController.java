@@ -90,6 +90,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserProfilePicture(userId));
     }
 
+    @GetMapping("/blocked")
+    public ResponseEntity<BlockListResponse> getBlockedUsers() {
+        return ResponseEntity.ok(userService.getBlockList());
+    }
+
     //hilal filter test için silebilirsiniz
     @GetMapping("/get-active-user/{email}")
     public ResponseEntity<UserResponse> getActiveUser(@PathVariable String email){
