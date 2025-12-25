@@ -3,6 +3,8 @@ package com.marvin.campustrade.service.impl;
 import com.marvin.campustrade.common.IncludeInactiveUsers;
 import com.marvin.campustrade.constants.RequestType;
 import com.marvin.campustrade.constants.TokenType;
+import com.marvin.campustrade.data.dto.ImageDTO;
+import com.marvin.campustrade.data.dto.ProfileImageDTO;
 import com.marvin.campustrade.data.dto.auth.*;
 import com.marvin.campustrade.data.dto.user.*;
 import com.marvin.campustrade.data.entity.*;
@@ -15,6 +17,7 @@ import com.marvin.campustrade.exception.InvalidStudentEmailDomainException;
 import com.marvin.campustrade.exception.UniversityNotFoundException;
 import com.marvin.campustrade.repository.*;
 import com.marvin.campustrade.service.EmailService;
+import com.marvin.campustrade.service.ImageService;
 import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final BlockMapper blockMapper;
     private final TransactionRepository  transactionRepository;
     private final TransactionMapper  transactionMapper;
+    private final ImageService imageService;
 
     @Override
     @IncludeInactiveUsers
@@ -395,7 +399,49 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    @Override
+    public ProfileImageDTO.PresignResponse presignProfilePicture(ProfileImageDTO.PresignRequest request){
+        Users user = getCurrentUser();
 
+        ImageDTO.PresignedImage presigned =
+                imageService.presignSingleUpload(
+                        "profile-pictures/" + user.getId() + "/",
+                        request.getContentType()
+                );
+
+        return new ProfileImageDTO.PresignResponse(
+                presigned.getKey(),
+                presigned.getUploadUrl()
+        );
+    }
+
+    @Override
+    public void saveProfilePicture(ProfileImageDTO.SaveRequest request) {
+        Users user = getCurrentUser();
+
+        String oldKey = user.getProfilePicUrl();
+
+        user.setProfilePicUrl(request.getKey());    // key not url
+        userRepository.save(user);
+
+        //delete old image from s3
+        if(oldKey != null && !oldKey.equals(request.getKey())){
+            imageService.deleteByKey(oldKey);
+        }
+    }
+
+    @Override
+    public ProfileImageDTO.ViewResponse getProfilePicture() {
+        Users user = getCurrentUser();
+
+        if(user.getProfilePicUrl() == null){
+            return new ProfileImageDTO.ViewResponse(null);
+        }
+
+        String url = imageService.presignGet(user.getProfilePicUrl());
+
+        return new ProfileImageDTO.ViewResponse(url);
+    }
 
     ////hilal filter testi silebilirsiniz
     //includeInactive'i koymadım yani active olmayan user hata vermeli

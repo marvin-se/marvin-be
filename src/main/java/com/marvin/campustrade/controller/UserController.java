@@ -1,5 +1,6 @@
 package com.marvin.campustrade.controller;
 
+import com.marvin.campustrade.data.dto.ProfileImageDTO;
 import com.marvin.campustrade.data.dto.auth.UserResponse;
 import com.marvin.campustrade.data.dto.user.*;
 import com.marvin.campustrade.service.UserService;
@@ -57,6 +58,29 @@ public class UserController {
     @GetMapping("/purchases")
     public ResponseEntity<PurchaseResponseDTO> getPurchaseHistory(){
         return ResponseEntity.ok(userService.getPurchaseHistory());
+    }
+
+    // profile - pic
+    @PostMapping("/profile-picture/presign")
+    public ResponseEntity<ProfileImageDTO.PresignResponse> presignProfilePicture(
+            @Valid @RequestBody ProfileImageDTO.PresignRequest request
+    ) {
+        return ResponseEntity.ok(
+                userService.presignProfilePicture(request)
+        );
+    }
+
+    @PutMapping("/profile-picture")
+    public ResponseEntity<Void> saveProfilePicture(
+            @Valid @RequestBody ProfileImageDTO.SaveRequest request
+    ) {
+        userService.saveProfilePicture(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/profile-picture")
+    public ResponseEntity<ProfileImageDTO.ViewResponse> getProfilePicture() {
+        return ResponseEntity.ok(userService.getProfilePicture());
     }
 
     //hilal filter test için silebilirsiniz
