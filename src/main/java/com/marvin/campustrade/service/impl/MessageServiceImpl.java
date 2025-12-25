@@ -234,6 +234,10 @@ public class MessageServiceImpl implements MessageService {
 
         dto.setMessages(messageDTOs);
 
+        dto.setImageUrl(imageRepository.findByProduct(conversation.getProduct())
+                .stream().findFirst().get().getImageUrl()
+        );
+
         return dto;
     }
 
