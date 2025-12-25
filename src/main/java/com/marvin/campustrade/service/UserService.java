@@ -1,5 +1,6 @@
 package com.marvin.campustrade.service;
 
+import com.marvin.campustrade.data.dto.ProfileImageDTO;
 import com.marvin.campustrade.data.dto.auth.*;
 import com.marvin.campustrade.data.dto.user.*;
 import com.marvin.campustrade.data.entity.Users;
@@ -20,6 +21,11 @@ public interface UserService {
     SalesResponseDTO getSalesHistory();
     PurchaseResponseDTO getPurchaseHistory();
     void resendVerificationEmail(ResendVerificationCodeDTO request);
+
+    // profile - pic
+    ProfileImageDTO.PresignResponse presignProfilePicture(ProfileImageDTO.PresignRequest request);
+    void saveProfilePicture(ProfileImageDTO.SaveRequest request);
+    ProfileImageDTO.ViewResponse getProfilePicture();
 
     //hilal filter testi silebilirsiniz
     UserResponse findActiveUserByEamil(String email);
