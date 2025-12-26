@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ProductDTO {
@@ -61,8 +62,7 @@ public class ProductDTO {
         private List<String> images;    //this returns imageKeys (what is being hold in db)
         private Boolean isFavourite;
         private Status status;
-
-        // OWNER ONLY
+        private LocalDateTime createdAt;
         private Long favouriteCount;
         private Long visitCount;
     }

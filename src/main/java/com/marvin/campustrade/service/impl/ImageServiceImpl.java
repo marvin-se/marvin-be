@@ -59,40 +59,12 @@ public class ImageServiceImpl implements ImageService {
         List<ImageDTO.PresignedImage> result = new ArrayList<>();
 
         for (ImageDTO.ImageItem item : request.getImages()) {
-
-            if (!ALLOWED_TYPES.contains(item.getContentType())) {
-                throw new IllegalArgumentException(
-                        "Unsupported content type: " + item.getContentType()
-                );
-            }
-
-            String extension = extensionFromContentType(item.getContentType());
-
-            String key = "products/"
-                    + productId
-                    + "/"
-                    + UUID.randomUUID()
-                    + extension;
-
-            PutObjectRequest putRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(key)
-                    .contentType(item.getContentType())
-                    .build();
-
-            PutObjectPresignRequest presignRequest =
-                    PutObjectPresignRequest.builder()
-                            .signatureDuration(Duration.ofMinutes(5))
-                            .putObjectRequest(putRequest)
-                            .build();
-
-            PresignedPutObjectRequest presigned =
-                    presigner.presignPutObject(presignRequest);
-
-            result.add(new ImageDTO.PresignedImage(
-                    key,
-                    presigned.url().toString()
-            ));
+            ImageDTO.PresignedImage presigned =
+                    presignSingleUpload(
+                            "products/" + productId + "/",
+                            item.getContentType()
+                    );
+            result.add(presigned);
         }
 
         return new ImageDTO.PresignResponse(result);
@@ -156,31 +128,75 @@ public class ImageServiceImpl implements ImageService {
         List<Image> images = imageRepository.findByProduct(product);
 
         List<ImageDTO.ImageResponse> result = images.stream()
-                .map(image -> {
-
-                    GetObjectRequest getRequest = GetObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(image.getImageUrl())
-                            .build();
-
-                    GetObjectPresignRequest presignRequest =
-                            GetObjectPresignRequest.builder()
-                                    .signatureDuration(Duration.ofMinutes(10))
-                                    .getObjectRequest(getRequest)
-                                    .build();
-
-                    String url = presigner
-                            .presignGetObject(presignRequest)
-                            .url()
-                            .toString();
-
-                    return new ImageDTO.ImageResponse(
-                            image.getImageUrl(), // key
-                            url                  // access url
-                    );
-                })
+                .map(image -> new ImageDTO.ImageResponse(
+                        image.getImageUrl(),
+                        presignGet(image.getImageUrl())
+                ))
                 .toList();
 
         return new ImageDTO.ImageListResponse(result);
+    }
+
+    @Override
+    public ImageDTO.PresignedImage presignSingleUpload(String keyPrefix, String contentType) {
+        if(!ALLOWED_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException(
+                    "Unsupported content type: " + contentType
+            );
+        }
+
+        String extension = extensionFromContentType(contentType);
+
+        String key = keyPrefix + UUID.randomUUID() + extension;
+
+        PutObjectRequest putRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .contentType(contentType)
+                .build();
+
+        PutObjectPresignRequest presignRequest =
+                PutObjectPresignRequest.builder()
+                        .signatureDuration(Duration.ofMinutes(5))
+                        .putObjectRequest(putRequest)
+                        .build();
+
+        PresignedPutObjectRequest presigned =
+                presigner.presignPutObject(presignRequest);
+
+        return new ImageDTO.PresignedImage(
+                key, presigned.url().toString()
+        );
+    }
+
+    @Override
+    public String presignGet(String key) {
+        GetObjectRequest getRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+
+        GetObjectPresignRequest presignRequest =
+                GetObjectPresignRequest.builder()
+                        .signatureDuration(Duration.ofMinutes(10))
+                        .getObjectRequest(getRequest)
+                        .build();
+
+        return presigner
+                .presignGetObject(presignRequest)
+                .url()
+                .toString();
+    }
+
+    @Override
+    public void deleteByKey(String key) {
+        if(key == null || key.isBlank()) return;
+
+        s3Client.deleteObject(
+                DeleteObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .build()
+        );
     }
 }

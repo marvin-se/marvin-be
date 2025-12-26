@@ -1,5 +1,6 @@
 package com.marvin.campustrade.controller;
 
+import com.marvin.campustrade.data.dto.ProfileImageDTO;
 import com.marvin.campustrade.data.dto.auth.UserResponse;
 import com.marvin.campustrade.data.dto.user.*;
 import com.marvin.campustrade.service.UserService;
@@ -57,6 +58,41 @@ public class UserController {
     @GetMapping("/purchases")
     public ResponseEntity<PurchaseResponseDTO> getPurchaseHistory(){
         return ResponseEntity.ok(userService.getPurchaseHistory());
+    }
+
+    // profile - pic
+    @PostMapping("/profile-picture/presign")
+    public ResponseEntity<ProfileImageDTO.PresignResponse> presignProfilePicture(
+            @Valid @RequestBody ProfileImageDTO.PresignRequest request
+    ) {
+        return ResponseEntity.ok(
+                userService.presignProfilePicture(request)
+        );
+    }
+
+    @PutMapping("/profile-picture")
+    public ResponseEntity<Void> saveProfilePicture(
+            @Valid @RequestBody ProfileImageDTO.SaveRequest request
+    ) {
+        userService.saveProfilePicture(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/profile-picture/me")
+    public ResponseEntity<ProfileImageDTO.ViewResponse> getMyProfilePicture() {
+        return ResponseEntity.ok(userService.getMyProfilePicture());
+    }
+
+    @GetMapping("/{userId}/profile-picture")
+    public ResponseEntity<ProfileImageDTO.ViewResponse> getUserProfilePicture(
+            @PathVariable Long userId
+    ) {
+        return ResponseEntity.ok(userService.getUserProfilePicture(userId));
+    }
+
+    @GetMapping("/blocked")
+    public ResponseEntity<BlockListResponse> getBlockedUsers() {
+        return ResponseEntity.ok(userService.getBlockList());
     }
 
     //hilal filter test için silebilirsiniz

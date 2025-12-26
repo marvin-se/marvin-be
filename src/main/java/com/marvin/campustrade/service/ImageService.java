@@ -13,4 +13,8 @@ public interface ImageService {
     void deleteImagesByProduct(Product product);
     void deleteImage(Long productId, String imageKey);
     ImageDTO.ImageListResponse getImagesWithPresignedUrls(Long productId);
+    ImageDTO.PresignedImage presignSingleUpload(String keyPrefix, String contentType);
+    String presignGet(String key);
+
+    void deleteByKey(String key);
 }

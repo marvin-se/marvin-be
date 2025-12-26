@@ -3,6 +3,8 @@ package com.marvin.campustrade.service.impl;
 import com.marvin.campustrade.common.IncludeInactiveUsers;
 import com.marvin.campustrade.constants.RequestType;
 import com.marvin.campustrade.constants.TokenType;
+import com.marvin.campustrade.data.dto.ImageDTO;
+import com.marvin.campustrade.data.dto.ProfileImageDTO;
 import com.marvin.campustrade.data.dto.auth.*;
 import com.marvin.campustrade.data.dto.user.*;
 import com.marvin.campustrade.data.entity.*;
@@ -10,11 +12,10 @@ import com.marvin.campustrade.data.mapper.BlockMapper;
 import com.marvin.campustrade.data.mapper.ProfileMapper;
 import com.marvin.campustrade.data.mapper.TransactionMapper;
 import com.marvin.campustrade.data.mapper.UserMapper;
-import com.marvin.campustrade.exception.EmailAlreadyExistsException;
-import com.marvin.campustrade.exception.InvalidStudentEmailDomainException;
-import com.marvin.campustrade.exception.UniversityNotFoundException;
+import com.marvin.campustrade.exception.*;
 import com.marvin.campustrade.repository.*;
 import com.marvin.campustrade.service.EmailService;
+import com.marvin.campustrade.service.ImageService;
 import com.marvin.campustrade.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,10 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +41,9 @@ public class UserServiceImpl implements UserService {
     private final BlockMapper blockMapper;
     private final TransactionRepository  transactionRepository;
     private final TransactionMapper  transactionMapper;
+    private final ProductRepository  productRepository;
+    private final FavouriteRepository  favouriteRepository;
+    private final ImageService imageService;
 
     @Override
     @IncludeInactiveUsers
@@ -279,14 +280,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteProfile(){
+    @Transactional
+    public void deleteProfile() {
+
         Users user = getCurrentUser();
-        if(!(user.getIsVerified() && user.getIsActive())){
-            throw new RuntimeException("User is not valid for this function");
+
+        if (!(user.getIsVerified() && user.getIsActive())) {
+            throw new UnauthorizedActionException("User is not valid for this function");
         }
+
+        List<Product> products = productRepository.findAllByUserId(user.getId());
+        productRepository.deleteAll(products);
+
+        List<Favourite> favourites = favouriteRepository.findAllByUser(user);
+        favouriteRepository.deleteAll(favourites);
+
+        usersBlockRepository.deleteAllByBlocker(user);
+        usersBlockRepository.deleteAllByBlocked(user);
+        tokenRepository.deleteAllByUser(user);
         user.setIsActive(false);
         userRepository.delete(user);
     }
+
 
     @Override
     public ProfileResponse getUser(String id) {
@@ -304,6 +319,13 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("This profile is not available");
         }
 
+        if(usersBlockRepository.findByBlockerAndBlocked(viewer, user).isPresent()){
+            throw new BlockedByException("You blocked the user");
+        }
+
+        if(usersBlockRepository.findByBlockerAndBlocked(user, viewer).isPresent()){
+            throw new BlockedByException("You are blocked");
+        }
         return profileMapper.toResponse(user);
     }
 
@@ -334,6 +356,25 @@ public class UserServiceImpl implements UserService {
         usersBlockRepository.save(blocking);
 
         return blockMapper.toBlock(user);
+    }
+
+    @Override
+    public BlockListResponse getBlockList() {
+        Users user = getCurrentUser();
+        if(!(user.getIsVerified() && user.getIsActive())){
+            throw new RuntimeException("User is not valid for this function");
+        }
+        List<Users> blocked = usersBlockRepository.findBlockedUsers(user)
+                .orElseThrow(() -> new BlockedByException("No blocked users"));
+
+        List<UserResponse> blockeduser = new ArrayList<>();
+
+        for(Users users : blocked){
+            UserResponse userResponse = userMapper.toResponse(users);
+            blockeduser.add(userResponse);
+        }
+
+        return BlockListResponse.builder().userList(blockeduser).numberOfBlocked(blockeduser.size()).build();
     }
 
     @Override
@@ -395,7 +436,61 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    @Override
+    public ProfileImageDTO.PresignResponse presignProfilePicture(ProfileImageDTO.PresignRequest request){
+        Users user = getCurrentUser();
 
+        ImageDTO.PresignedImage presigned =
+                imageService.presignSingleUpload(
+                        "profile-pictures/" + user.getId() + "/",
+                        request.getContentType()
+                );
+
+        return new ProfileImageDTO.PresignResponse(
+                presigned.getKey(),
+                presigned.getUploadUrl()
+        );
+    }
+
+    @Override
+    public void saveProfilePicture(ProfileImageDTO.SaveRequest request) {
+        Users user = getCurrentUser();
+
+        String oldKey = user.getProfilePicUrl();
+
+        user.setProfilePicUrl(request.getKey());    // key not url
+        userRepository.save(user);
+
+        //delete old image from s3
+        if(oldKey != null && !oldKey.equals(request.getKey())){
+            imageService.deleteByKey(oldKey);
+        }
+    }
+
+    public ProfileImageDTO.ViewResponse getUserProfilePicture(Long userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (user.getProfilePicUrl() == null) {
+            return new ProfileImageDTO.ViewResponse(null);
+        }
+
+        String url = imageService.presignGet(user.getProfilePicUrl());
+        return new ProfileImageDTO.ViewResponse(url);
+    }
+
+    @Override
+    public ProfileImageDTO.ViewResponse getMyProfilePicture() {
+        Users user = getCurrentUser();
+
+        if(user.getProfilePicUrl() == null){
+            return new ProfileImageDTO.ViewResponse(null);
+        }
+
+        String url = imageService.presignGet(user.getProfilePicUrl());
+
+        return new ProfileImageDTO.ViewResponse(url);
+    }
 
     ////hilal filter testi silebilirsiniz
     //includeInactive'i koymadım yani active olmayan user hata vermeli
